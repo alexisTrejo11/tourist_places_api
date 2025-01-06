@@ -1,5 +1,6 @@
 package at.backend.tourist.places.DTOs;
 
+import at.backend.tourist.places.Utils.PlaceRelationships;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -15,13 +16,7 @@ public class TouristPlaceInsertDTO {
 
     @JsonProperty("description")
     @NotNull(message = "description can't be null")
-    @NotBlank(message = "description can't be blank")
     private String description;
-
-    @JsonProperty("rating")
-    @NotNull(message = "rating can't be null")
-    @Positive(message = "rating can't be negative")
-    private Double rating;
 
     @JsonProperty("image")
     private String image;
@@ -45,4 +40,6 @@ public class TouristPlaceInsertDTO {
     @NotNull(message = "category_id can't be null")
     @Positive(message = "category_id can't be negative")
     private Long categoryId;
+
+    private PlaceRelationships placeRelationships;
 }

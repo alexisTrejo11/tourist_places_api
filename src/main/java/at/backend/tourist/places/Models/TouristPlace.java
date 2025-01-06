@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Type;
 
 import java.util.List;
 
@@ -16,11 +17,22 @@ public class TouristPlace {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "name", nullable = false, unique = true)
     private String name;
+
+    @Column(name = "description", nullable = false, columnDefinition = "TEXT")
     private String description;
-    private Double rating;
+
+    @Column(name = "rating", nullable = false)
+    private Double rating = 0.0;
+
+    @Column(name = "image")
     private String image;
+
+    @Column(name = "opening_hours")
     private String openingHours;
+
+    @Column(name = "price_range")
     private String priceRange;
 
     @ManyToOne
@@ -28,7 +40,7 @@ public class TouristPlace {
     private Country country;
 
     @ManyToOne
-    @JoinColumn(name = "category_id")
+    @JoinColumn(name = "category_id", nullable = false)
     private PlaceCategory category;
 
     @OneToMany(mappedBy = "touristPlace")

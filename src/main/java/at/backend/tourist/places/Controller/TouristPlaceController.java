@@ -3,6 +3,9 @@ package at.backend.tourist.places.Controller;
 import at.backend.tourist.places.DTOs.TouristPlaceDTO;
 import at.backend.tourist.places.DTOs.TouristPlaceInsertDTO;
 import at.backend.tourist.places.Service.TouristPlaceService;
+import at.backend.tourist.places.Utils.PlaceRelationships;
+import at.backend.tourist.places.Utils.Result;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +36,14 @@ public class TouristPlaceController {
     }
 
     @PostMapping
-    public ResponseEntity<TouristPlaceDTO> createTouristPlace(@RequestBody TouristPlaceInsertDTO insertDTO) {
+    public ResponseEntity<?> createTouristPlace(@Valid @RequestBody TouristPlaceInsertDTO insertDTO) {
+        Result<PlaceRelationships> validationResult = touristPlaceService.validate(insertDTO);
+        if (!validationResult.isSuccess()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(validationResult.getErrorMessage());
+        }
+
+        insertDTO.setPlaceRelationships(validationResult.getData());
+
         TouristPlaceDTO createdTouristPlace = touristPlaceService.create(insertDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdTouristPlace);
     }

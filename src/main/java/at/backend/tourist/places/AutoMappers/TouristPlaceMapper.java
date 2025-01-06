@@ -14,6 +14,7 @@ public interface TouristPlaceMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "category", ignore = true)
+    @Mapping(target = "rating", ignore = true)
     @Mapping(target = "country", ignore = true)
     @Mapping(target = "activities", ignore = true)
     @Mapping(target = "reviews", ignore = true)
