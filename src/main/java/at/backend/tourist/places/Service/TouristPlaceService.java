@@ -9,7 +9,7 @@ import at.backend.tourist.places.Utils.Result;
 import java.util.List;
 
 public interface TouristPlaceService extends CommonService<TouristPlaceDTO, TouristPlaceInsertDTO> {
-    List<TouristPlace> findByCountry(Long countryId);
-    List<TouristPlace> findByCategory(Long categoryId);
+    List<TouristPlaceDTO> getByCountry(Long countryId);
+    List<TouristPlaceDTO> getByCategory(Long categoryId);
     Result<PlaceRelationships> validate(TouristPlaceInsertDTO insertDTO);
 }

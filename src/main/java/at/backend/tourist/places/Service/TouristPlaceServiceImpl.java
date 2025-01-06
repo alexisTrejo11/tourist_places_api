@@ -28,13 +28,48 @@ public class TouristPlaceServiceImpl implements TouristPlaceService {
     private final TouristPlaceMapper touristPlaceMapper;
 
     @Override
-    public List<TouristPlace> findByCountry(Long countryId) {
-        return touristPlaceRepository.findByCountryId(countryId);
+    public TouristPlaceDTO getById(Long id) {
+        Optional<TouristPlace> optionalTouristPlace = touristPlaceRepository.findById(id);
+        return optionalTouristPlace
+                .map(touristPlaceMapper::entityToDTO)
+                .orElse(null);
     }
 
     @Override
-    public List<TouristPlace> findByCategory(Long categoryId) {
-        return touristPlaceRepository.findByCategoryId(categoryId);
+    public List<TouristPlaceDTO> getAll() {
+        List<TouristPlace> activities =  touristPlaceRepository.findAll();
+
+        return activities.stream()
+                .map(touristPlaceMapper::entityToDTO)
+                .toList();
+    }
+
+    @Override
+    public List<TouristPlaceDTO> getByCountry(Long countryId) {
+        boolean isCountryExisting = countryRepository.existsById(countryId);
+        if (!isCountryExisting) {
+            return null;
+        }
+
+        List<TouristPlace> places = touristPlaceRepository.findByCountryId(countryId);
+
+        return places.stream()
+                .map(touristPlaceMapper::entityToDTO)
+                .toList();
+    }
+
+    @Override
+    public List<TouristPlaceDTO> getByCategory(Long categoryId) {
+        boolean isCategoryExisting = placeCategoryRepository.existsById(categoryId);
+        if (!isCategoryExisting) {
+            return null;
+        }
+
+        List<TouristPlace> places = touristPlaceRepository.findByCategoryId(categoryId);
+
+        return places.stream()
+                .map(touristPlaceMapper::entityToDTO)
+                .toList();
     }
 
     @Override
@@ -62,23 +97,6 @@ public class TouristPlaceServiceImpl implements TouristPlaceService {
         touristPlaceRepository.saveAndFlush(place);
 
         return touristPlaceMapper.entityToDTO(place);
-    }
-
-    @Override
-    public TouristPlaceDTO getById(Long id) {
-        Optional<TouristPlace> optionalTouristPlace = touristPlaceRepository.findById(id);
-        return optionalTouristPlace
-                .map(touristPlaceMapper::entityToDTO)
-                .orElse(null);
-    }
-
-    @Override
-    public List<TouristPlaceDTO> getAll() {
-        List<TouristPlace> activities =  touristPlaceRepository.findAll();
-
-        return activities.stream()
-                .map(touristPlaceMapper::entityToDTO)
-                .toList();
     }
 
     @Override

@@ -35,6 +35,27 @@ public class TouristPlaceController {
         return ResponseEntity.ok(country);
     }
 
+    @GetMapping("/country/{countryId}")
+    public ResponseEntity<List<TouristPlaceDTO>> getByCountryId(@PathVariable Long countryId) {
+        List<TouristPlaceDTO> places = touristPlaceService.getByCountry(countryId);
+        if (places == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(places);
+    }
+
+    @GetMapping("/category/{categoryId}")
+    public ResponseEntity<List<TouristPlaceDTO>> getByCategoryId(@PathVariable Long categoryId) {
+        List<TouristPlaceDTO> places = touristPlaceService.getByCategory(categoryId);
+        if (places == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(places);
+    }
+
+
     @PostMapping
     public ResponseEntity<?> createTouristPlace(@Valid @RequestBody TouristPlaceInsertDTO insertDTO) {
         Result<PlaceRelationships> validationResult = touristPlaceService.validate(insertDTO);
