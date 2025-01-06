@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: Tourist Places
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/tourist_places_db
+    username: alexistrejo
+    password: vladilena
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    paths-to-match: /**
+    packages-to-scan: microservice.enrollment_service
+
+server:
+  port: 8080
