@@ -17,6 +17,7 @@ public class PlaceCategory {
     private Long id;
 
     private String name;
+
     private String description;
 
     @OneToMany(mappedBy = "category")
