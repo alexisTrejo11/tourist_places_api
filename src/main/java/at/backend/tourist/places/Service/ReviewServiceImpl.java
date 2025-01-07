@@ -4,10 +4,12 @@ import at.backend.tourist.places.AutoMappers.ReviewMapper;
 import at.backend.tourist.places.DTOs.ReviewDTO;
 import at.backend.tourist.places.DTOs.ReviewInsertDTO;
 import at.backend.tourist.places.Models.Review;
+import at.backend.tourist.places.Models.TouristPlace;
 import at.backend.tourist.places.Repository.ReviewRepository;
+import at.backend.tourist.places.Repository.TouristPlaceRepository;
+import at.backend.tourist.places.Utils.Result;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,20 +20,45 @@ import java.util.Optional;
 public class ReviewServiceImpl implements ReviewService {
 
     private final ReviewRepository reviewRepository;
+    private final TouristPlaceRepository touristPlaceRepository;
     private final ReviewMapper reviewMapper;
 
     @Override
-    public List<Review> findByTouristPlace(Long touristPlaceId) {
-        return reviewRepository.findByPlaceId(touristPlaceId);
+    public List<ReviewDTO> getByTouristPlace(Long touristPlaceId) {
+        boolean isPlaceExisiting = touristPlaceRepository.existsById(touristPlaceId);
+        if (!isPlaceExisiting) {
+            return null;
+        }
+
+        List<Review> reviews = reviewRepository.findByPlaceId(touristPlaceId);
+
+        return reviews.stream()
+                .map(reviewMapper::entityToDTO)
+                .toList();
+    }
+
+    @Override
+    public Result<TouristPlace> validate(ReviewInsertDTO insertDTO) {
+        Optional<TouristPlace> touristPlace = touristPlaceRepository.findById(insertDTO.getPlaceId());
+        if (touristPlace.isEmpty()) {
+            return Result.failure("Tourist place ID");
+        }
+
+        if (insertDTO.getRating() < 0 ||insertDTO.getRating() > 10) {
+            return Result.failure("Rating out of range");
+        }
+
+        return Result.success(touristPlace.get());
     }
 
     @Override
     public ReviewDTO create(ReviewInsertDTO insertDTO) {
-        Review activity = reviewMapper.DTOToEntity(insertDTO);
+        Review review = reviewMapper.DTOToEntity(insertDTO);
+        review.setPlace(insertDTO.getTouristPlace());
 
-        reviewRepository.saveAndFlush(activity);
+        reviewRepository.saveAndFlush(review);
 
-        return reviewMapper.entityToDTO(activity);
+        return reviewMapper.entityToDTO(review);
     }
 
     @Override
@@ -45,9 +72,9 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public List<ReviewDTO> getAll() {
-        List<Review> activities = reviewRepository.findAll();
+        List<Review> reviews = reviewRepository.findAll();
 
-        return activities.stream()
+        return reviews.stream()
                 .map(reviewMapper::entityToDTO)
                 .toList();
     }

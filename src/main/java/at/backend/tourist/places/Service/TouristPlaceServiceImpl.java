@@ -5,6 +5,7 @@ import at.backend.tourist.places.DTOs.TouristPlaceDTO;
 import at.backend.tourist.places.DTOs.TouristPlaceInsertDTO;
 import at.backend.tourist.places.Models.Country;
 import at.backend.tourist.places.Models.PlaceCategory;
+import at.backend.tourist.places.Models.Review;
 import at.backend.tourist.places.Models.TouristPlace;
 import at.backend.tourist.places.Repository.CountryRepository;
 import at.backend.tourist.places.Repository.PlaceCategoryRepository;
@@ -13,6 +14,7 @@ import at.backend.tourist.places.Utils.PlaceRelationships;
 import at.backend.tourist.places.Utils.Result;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -88,6 +90,18 @@ public class TouristPlaceServiceImpl implements TouristPlaceService {
     }
 
     @Override
+    @Async
+    public void updatePlaceRating(Long id) {
+        TouristPlace touristPlace = touristPlaceRepository.findByIdWithReviews(id)
+                .orElseThrow(() -> new EntityNotFoundException("Tourist place not found"));
+
+        double averageRating = calculateRatingAverage(touristPlace);
+        touristPlace.setRating(averageRating);
+
+        touristPlaceRepository.save(touristPlace);
+    }
+
+    @Override
     public TouristPlaceDTO create(TouristPlaceInsertDTO insertDTO) {
         TouristPlace place = touristPlaceMapper.DTOToEntity(insertDTO);
 
@@ -107,5 +121,17 @@ public class TouristPlaceServiceImpl implements TouristPlaceService {
         }
 
         touristPlaceRepository.deleteById(id);
+    }
+
+    private double calculateRatingAverage(TouristPlace touristPlace) {
+        double averageRating = touristPlace.getReviews().stream()
+                .map(Review::getRating)
+                .mapToDouble(Double::doubleValue)
+                .average()
+                .orElse(0.0);
+
+        // Round in one decimal
+        averageRating = Math.round(averageRating * 10.0) / 10.0;
+        return averageRating;
     }
 }

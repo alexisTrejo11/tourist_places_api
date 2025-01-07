@@ -43,9 +43,9 @@ public class TouristPlace {
     @JoinColumn(name = "category_id", nullable = false)
     private PlaceCategory category;
 
-    @OneToMany(mappedBy = "touristPlace")
+    @OneToMany(mappedBy = "touristPlace", fetch = FetchType.LAZY)
     private List<Activity> activities;
 
-    @OneToMany(mappedBy = "place")
+    @OneToMany(mappedBy = "place", fetch = FetchType.LAZY)
     private List<Review> reviews;
 }

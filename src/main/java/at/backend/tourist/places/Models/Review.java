@@ -9,15 +9,19 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Table(name = "reviews")
 public class Review {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "ratings", nullable = false)
     private Double rating;
 
+    @Column(name = "comment", nullable = false, columnDefinition = "TEXT")
     private String comment;
 
+    @Column(name = "author")
     private String author;
 
     @ManyToOne

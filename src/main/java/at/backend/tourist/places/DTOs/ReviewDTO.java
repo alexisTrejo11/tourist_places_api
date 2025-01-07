@@ -1,5 +1,6 @@
 package at.backend.tourist.places.DTOs;
 
+import at.backend.tourist.places.Models.TouristPlace;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 

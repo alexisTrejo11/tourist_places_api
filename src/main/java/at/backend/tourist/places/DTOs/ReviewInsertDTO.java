@@ -1,5 +1,6 @@
 package at.backend.tourist.places.DTOs;
 
+import at.backend.tourist.places.Models.TouristPlace;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -26,4 +27,6 @@ public class ReviewInsertDTO {
     @NotNull(message = "place_id can't be null")
     @Positive(message = "place_id can't be negative")
     private Long placeId;
+
+    private TouristPlace touristPlace;
 }
