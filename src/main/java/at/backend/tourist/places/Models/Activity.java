@@ -15,7 +15,7 @@ public class Activity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, unique = true)
     private String name;
 
     @Column(name = "description", nullable = false)
@@ -27,7 +27,7 @@ public class Activity {
     @Column(name = "duration", nullable = false)
     private String duration;
 
-    @ManyToOne
-    @JoinColumn(name = "place_id")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "place_id", nullable = false)
     private TouristPlace touristPlace;
 }

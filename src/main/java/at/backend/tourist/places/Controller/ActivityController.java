@@ -2,7 +2,9 @@ package at.backend.tourist.places.Controller;
 
 import at.backend.tourist.places.DTOs.ActivityDTO;
 import at.backend.tourist.places.DTOs.ActivityInsertDTO;
+import at.backend.tourist.places.Models.TouristPlace;
 import at.backend.tourist.places.Service.ActivityService;
+import at.backend.tourist.places.Utils.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,9 +34,26 @@ public class ActivityController {
         return ResponseEntity.ok(activity);
     }
 
+    @GetMapping("/tourist_place/{place_id}")
+    public ResponseEntity<List<ActivityDTO>> getByTouristPlaceId(@PathVariable Long place_id) {
+        List<ActivityDTO> activity = activityService.getByTouristPlace(place_id);
+        if (activity == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(activity);
+    }
+
     @PostMapping
-    public ResponseEntity<ActivityDTO> createActivity(@RequestBody ActivityInsertDTO insertDTO) {
-        ActivityDTO createdActivity = activityService.create(insertDTO);
+    public ResponseEntity<?> createActivity(@RequestBody ActivityInsertDTO insertDTO) {
+       Result<TouristPlace> validationResult = activityService.validate(insertDTO);
+       if (!validationResult.isSuccess()) {
+           return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(validationResult.getErrorMessage());
+       }
+
+       insertDTO.setTouristPlace(validationResult.getData());
+       ActivityDTO createdActivity = activityService.create(insertDTO);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(createdActivity);
     }
 
