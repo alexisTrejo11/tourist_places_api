@@ -11,6 +11,7 @@ import at.backend.tourist.places.Utils.StringHandler;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,6 +25,26 @@ public class CountryServiceImpl implements CountryService {
     private final CountryMapper countryMapper;
 
     @Override
+    @Cacheable(value = "countryById", key = "#id")
+    public CountryDTO getById(Long id) {
+        Optional<Country> optionalCountry = countryRepository.findById(id);
+        return optionalCountry
+                .map(countryMapper::entityToDTO)
+                .orElse(null);
+    }
+
+    @Override
+    @Cacheable(value = "allCountries")
+    public List<CountryDTO> getAll() {
+        List<Country> countries =  countryRepository.findAll();
+
+        return countries.stream()
+                .map(countryMapper::entityToDTO)
+                .toList();
+    }
+
+    @Override
+    @Cacheable(value = "countriesByContinent", key = "#continent.name")
     public List<CountryDTO> getByContinent(Continent continent) {
         List<Country> countries = countryRepository.findByContinent(continent);
 
@@ -33,6 +54,7 @@ public class CountryServiceImpl implements CountryService {
     }
 
     @Override
+    @Cacheable(value = "countryByName", key = "#name")
     public CountryDTO getByName(String name) {
         name = StringHandler.capitalize(name);
 
@@ -42,9 +64,10 @@ public class CountryServiceImpl implements CountryService {
                 .orElse(null);
     }
 
+
     public Result<Void> validate(CountryInsertDTO insertDTO) {
         String name = StringHandler.capitalize(insertDTO.getName());
-;
+
         Optional<Country> optionalCountry = countryRepository.findByName(name);
         if (optionalCountry.isPresent()) {
             return Result.failure("Country already created");
@@ -60,23 +83,6 @@ public class CountryServiceImpl implements CountryService {
         countryRepository.saveAndFlush(country);
 
         return countryMapper.entityToDTO(country);
-    }
-
-    @Override
-    public CountryDTO getById(Long id) {
-        Optional<Country> optionalCountry = countryRepository.findById(id);
-        return optionalCountry
-                .map(countryMapper::entityToDTO)
-                .orElse(null);
-    }
-
-    @Override
-    public List<CountryDTO> getAll() {
-        List<Country> countries =  countryRepository.findAll();
-
-        return countries.stream()
-                .map(countryMapper::entityToDTO)
-                .toList();
     }
 
     @Override

@@ -10,12 +10,14 @@ import at.backend.tourist.places.Repository.TouristPlaceRepository;
 import at.backend.tourist.places.Utils.Result;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class ActivityServiceImpl implements ActivityService {
 
@@ -24,13 +26,31 @@ public class ActivityServiceImpl implements ActivityService {
     private final ActivityMapper activityMapper;
 
     @Override
+    public ActivityDTO getById(Long id) {
+        Optional<Activity> optionalActivity = activityRepository.findById(id);
+        return optionalActivity
+                .map(activityMapper::entityToDTO)
+                .orElse(null);
+
+    }
+
+    @Override
+    public List<ActivityDTO> getAll() {
+        List<Activity> activities = activityRepository.findAll();
+
+        return activities.stream()
+                .map(activityMapper::entityToDTO)
+                .toList();
+    }
+
+    @Override
     public List<ActivityDTO> getByTouristPlace(Long id) {
         boolean isPlaceExisting = touristPlaceRepository.existsById(id);
         if (!isPlaceExisting) {
             return null;
         }
 
-        List<Activity> activities =  activityRepository.findByTouristPlaceId(id);
+        List<Activity> activities = activityRepository.findByTouristPlaceId(id);
 
         return activities.stream()
                 .map(activityMapper::entityToDTO)
@@ -53,41 +73,29 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public ActivityDTO create(ActivityInsertDTO insertDTO) {
-        Activity activity = activityMapper.DTOToEntity(insertDTO);
+        log.info("Starting to create activity for tourist place: {}", insertDTO.getTouristPlace());
 
+        Activity activity = activityMapper.DTOToEntity(insertDTO);
         activity.setTouristPlace(insertDTO.getTouristPlace());
 
         activityRepository.saveAndFlush(activity);
+
+        log.info("Activity created successfully with ID: {}", activity.getId());
 
         return activityMapper.entityToDTO(activity);
     }
 
     @Override
-    public ActivityDTO getById(Long id) {
-        Optional<Activity> optionalActivity = activityRepository.findById(id);
-        return optionalActivity
-                .map(activityMapper::entityToDTO)
-                .orElse(null);
-
-    }
-
-    @Override
-    public List<ActivityDTO> getAll() {
-        List<Activity> activities =  activityRepository.findAll();
-
-        return activities.stream()
-                .map(activityMapper::entityToDTO)
-                .toList();
-    }
-
-    @Override
     public void delete(Long id) {
+        log.info("Attempting to delete activity with ID: {}", id);
+
         boolean exists = activityRepository.existsById(id);
         if (!exists) {
+            log.error("Activity with ID: {} not found for deletion", id);
             throw new EntityNotFoundException("Activity not found");
         }
 
         activityRepository.deleteById(id);
+        log.info("Activity with ID: {} deleted successfully", id);
     }
 }
-

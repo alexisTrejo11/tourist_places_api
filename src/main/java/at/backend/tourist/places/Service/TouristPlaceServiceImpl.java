@@ -14,6 +14,7 @@ import at.backend.tourist.places.Utils.PlaceRelationships;
 import at.backend.tourist.places.Utils.Result;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TouristPlaceServiceImpl implements TouristPlaceService {
 
     private final TouristPlaceRepository touristPlaceRepository;
@@ -90,37 +92,51 @@ public class TouristPlaceServiceImpl implements TouristPlaceService {
     }
 
     @Override
-    @Async
-    public void updatePlaceRating(Long id) {
-        TouristPlace touristPlace = touristPlaceRepository.findByIdWithReviews(id)
-                .orElseThrow(() -> new EntityNotFoundException("Tourist place not found"));
-
-        double averageRating = calculateRatingAverage(touristPlace);
-        touristPlace.setRating(averageRating);
-
-        touristPlaceRepository.save(touristPlace);
-    }
-
-    @Override
     public TouristPlaceDTO create(TouristPlaceInsertDTO insertDTO) {
-        TouristPlace place = touristPlaceMapper.DTOToEntity(insertDTO);
+        log.info("Starting to create tourist place with name: {}", insertDTO.getName());
 
+        TouristPlace place = touristPlaceMapper.DTOToEntity(insertDTO);
         place.setCountry(insertDTO.getPlaceRelationships().getCountry());
         place.setCategory(insertDTO.getPlaceRelationships().getPlaceCategory());
 
         touristPlaceRepository.saveAndFlush(place);
 
+        log.info("Tourist place created successfully with ID: {}", place.getId());
+
         return touristPlaceMapper.entityToDTO(place);
     }
 
     @Override
+    @Async("taskExecutor")
+    public void updatePlaceRating(Long id) {
+        log.info("Starting to update rating for tourist place with ID: {}", id);
+
+        TouristPlace touristPlace = touristPlaceRepository.findByIdWithReviews(id)
+                .orElseThrow(() -> {
+                    log.error("Tourist place with ID: {} not found for rating update", id);
+                    return new EntityNotFoundException("Tourist place not found");
+                });
+
+        double averageRating = calculateRatingAverage(touristPlace);
+        touristPlace.setRating(averageRating);
+
+        touristPlaceRepository.save(touristPlace);
+
+        log.info("Rating updated for tourist place with ID: {}. New average rating: {}", id, averageRating);
+    }
+
+    @Override
     public void delete(Long id) {
+        log.info("Attempting to delete tourist place with ID: {}", id);
+
         boolean exists = touristPlaceRepository.existsById(id);
         if (!exists) {
+            log.error("Tourist place with ID: {} not found for deletion", id);
             throw new EntityNotFoundException("TouristPlace not found");
         }
 
         touristPlaceRepository.deleteById(id);
+        log.info("Tourist place with ID: {} deleted successfully", id);
     }
 
     private double calculateRatingAverage(TouristPlace touristPlace) {
@@ -132,6 +148,9 @@ public class TouristPlaceServiceImpl implements TouristPlaceService {
 
         // Round in one decimal
         averageRating = Math.round(averageRating * 10.0) / 10.0;
+
+        log.debug("Calculated average rating for tourist place: {}", averageRating);
+
         return averageRating;
     }
 }
