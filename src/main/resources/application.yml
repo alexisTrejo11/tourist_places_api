@@ -4,8 +4,8 @@ spring:
 
   datasource:
     url: jdbc:postgresql://localhost:5432/tourist_places_db
-    username: alexistrejo
-    password: vladilena
+    username: postgres
+    password: root
     driver-class-name: org.postgresql.Driver
 
   jpa:
