@@ -1,6 +1,6 @@
 package at.backend.tourist.places.DTOs;
 
-import at.backend.tourist.places.Models.Continent;
+import at.backend.tourist.places.Utils.Enum.Continent;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;

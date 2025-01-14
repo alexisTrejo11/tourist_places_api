@@ -3,14 +3,13 @@ package at.backend.tourist.places.Service;
 import at.backend.tourist.places.AutoMappers.CountryMapper;
 import at.backend.tourist.places.DTOs.CountryDTO;
 import at.backend.tourist.places.DTOs.CountryInsertDTO;
-import at.backend.tourist.places.Models.Continent;
+import at.backend.tourist.places.Utils.Enum.Continent;
 import at.backend.tourist.places.Models.Country;
 import at.backend.tourist.places.Repository.CountryRepository;
 import at.backend.tourist.places.Utils.Result;
 import at.backend.tourist.places.Utils.StringHandler;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 

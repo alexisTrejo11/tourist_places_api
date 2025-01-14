@@ -1,4 +1,4 @@
-package at.backend.tourist.places.Models;
+package at.backend.tourist.places.Utils.Enum;
 
 public enum Continent {
     AMERICA,

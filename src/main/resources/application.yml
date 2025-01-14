@@ -2,10 +2,29 @@ spring:
   application:
     name: Tourist Places
 
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 1018142039593-7u9172mvrqrdn7hvqbng81n6tc24ts9e.apps.googleusercontent.com
+            client-secret: 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
+            scope: profile, email
+            redirect-uri: "{baseUrl}/login/oauth2/code/google"
+            authorization-grant-type: authorization_code
+            client-authentication-method: client_secret_basic
+            provider: google
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+            user-name-attribute: sub
+
   datasource:
-    url: jdbc:postgresql://localhost:5432/tourist_places_db
-    username: postgres
-    password: root
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/tourist_places_db}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:root}
     driver-class-name: org.postgresql.Driver
 
   jpa:

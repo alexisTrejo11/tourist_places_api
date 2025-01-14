@@ -1,5 +1,6 @@
 package at.backend.tourist.places.Models;
 
+import at.backend.tourist.places.Utils.Enum.Continent;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
