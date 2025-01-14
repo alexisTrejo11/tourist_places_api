@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Dashboard</title>
+  <style>
+    .dashboard-container {
+max-width: 800px;
+margin: 0 auto;
+padding: 20px;
+}
+    .welcome-section {
+background-color: #f5f5f5;
+padding: 20px;
+border-radius: 5px;
+margin-bottom: 20px;
+}
+    .user-info {
+margin-top: 20px;
+}
+  </style>
+</head>
+<body>
+<div class="dashboard-container">
+  <div class="welcome-section">
+    <h1>Bienvenido a tu Dashboard</h1>
+    <div class="user-info" th:if="${name}">
+      <p>Nombre: <span th:text="${name}">Nombre del Usuario</span></p>
+      <p>Email: <span th:text="${email}">Email del Usuario</span></p>
+    </div>
+  </div>
+
+  <div class="content-section">
+    <h2>Tu Contenido</h2>
+    <!-- Aquí puedes agregar el contenido específico de tu aplicación -->
+    <p>Este es tu espacio personal en la aplicación.</p>
+  </div>
+
+  <form th:action="@{/logout}" method="post">
+    <button type="submit">Cerrar Sesión</button>
+  </form>
+</div>
+</body>
+</html>

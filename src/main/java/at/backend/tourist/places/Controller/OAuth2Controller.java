@@ -3,7 +3,6 @@ package at.backend.tourist.places.Controller;
 
 import at.backend.tourist.places.Models.User;
 import at.backend.tourist.places.Repository.UserRepository;
-import at.backend.tourist.places.Service.UserService;
 import at.backend.tourist.places.Utils.Result;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
 @Controller
-public class AuthController {
+public class OAuth2Controller {
 
     @Autowired
     private UserRepository userService;
