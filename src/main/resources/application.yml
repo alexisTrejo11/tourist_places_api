@@ -7,13 +7,12 @@ spring:
       client:
         registration:
           google:
-            client-id: 1018142039593-7u9172mvrqrdn7hvqbng81n6tc24ts9e.apps.googleusercontent.com
-            client-secret: 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
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            redirect-uri: ${GOOGLE_REDIRECT_URI}
             scope: profile, email
-            redirect-uri: "{baseUrl}/login/oauth2/code/google"
             authorization-grant-type: authorization_code
             client-authentication-method: client_secret_basic
-            provider: google
         provider:
           google:
             authorization-uri: https://accounts.google.com/o/oauth2/auth
@@ -22,15 +21,22 @@ spring:
             user-name-attribute: sub
 
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/tourist_places_db}
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:root}
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
+
+server:
+  port: ${SERVER_PORT}
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION}
 
 springdoc:
   api-docs:
@@ -39,10 +45,3 @@ springdoc:
     path: /swagger-ui.html
     paths-to-match: /**
     packages-to-scan: microservice.enrollment_service
-
-server:
-  port: 8080
-
-jwt:
-  secret: 'U29tZSByYW5kb20gdGV4dCBzdHJpbmcgdG8gYmUgdXNlZCBpbiBhbGxpZ29yYXRoIG5hbWVzIGFuZCBjb250ZXh0IGluIGJhc2U2NCBjb2RlIGluIHJlYWQgYXQgdGhlIGV4dHJhIGVuY29kaW5nLg=='
-  expiration: 86400 # 24 HOURS
