@@ -4,11 +4,6 @@ import at.backend.tourist.places.Utils.Enum.Role;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import java.util.Collections;
-import java.util.Collection;
 
 @Entity
 @Data
@@ -23,7 +18,5 @@ public class User {
     private String name;
     private String password;
     private String provider;
-    private Role role;
-
-
+    private Role role = Role.VIEWER;
 }

@@ -5,10 +5,15 @@ import at.backend.tourist.places.DTOs.SignupDTO;
 import at.backend.tourist.places.DTOs.UserDTO;
 import at.backend.tourist.places.Models.User;
 import at.backend.tourist.places.Repository.UserRepository;
+import at.backend.tourist.places.Utils.PasswordHandler;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,8 +25,11 @@ public class UserServiceImpl implements UserService {
     private final UserMappers userMappers;
 
     @Override
-    public UserDTO create(SignupDTO entity) {
-       User user = userMappers.DTOToEntity(entity);
+    public UserDTO create(SignupDTO signupDTO) {
+       User user = userMappers.DTOToEntity(signupDTO);
+
+       String hashedPassword = PasswordHandler.hashPassword(user.getPassword());
+       user.setPassword(hashedPassword);
 
        userRepository.saveAndFlush(user);
 
@@ -51,5 +59,17 @@ public class UserServiceImpl implements UserService {
         }
 
         userRepository.deleteById(id);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + email));
+
+        return new org.springframework.security.core.userdetails.User(
+                user.getEmail(),
+                user.getPassword(),
+                Collections.emptyList()
+        );
     }
 }

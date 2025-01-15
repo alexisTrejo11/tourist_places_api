@@ -42,3 +42,7 @@ springdoc:
 
 server:
   port: 8080
+
+jwt:
+  secret: 'U29tZSByYW5kb20gdGV4dCBzdHJpbmcgdG8gYmUgdXNlZCBpbiBhbGxpZ29yYXRoIG5hbWVzIGFuZCBjb250ZXh0IGluIGJhc2U2NCBjb2RlIGluIHJlYWQgYXQgdGhlIGV4dHJhIGVuY29kaW5nLg=='
+  expiration: 86400 # 24 HOURS
