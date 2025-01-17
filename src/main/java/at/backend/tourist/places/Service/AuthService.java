@@ -8,6 +8,12 @@ import at.backend.tourist.places.Utils.Result;
 public interface AuthService {
     Result<Void> validateSignup(SignupDTO signupDTO);
     Result<UserDTO> validateLogin(LoginDTO signupDTO);
+
     String processSignup(UserDTO signupDTO);
     String processLogin(UserDTO loginDTO);
+
+    void invalidToken(String token);
+    String generateResetToken(String email);
+    String getEmailFromToken(String email);
+    boolean isTokenValid(String token);
 }

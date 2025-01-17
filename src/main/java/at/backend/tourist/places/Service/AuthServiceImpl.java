@@ -6,7 +6,8 @@ import at.backend.tourist.places.DTOs.SignupDTO;
 import at.backend.tourist.places.DTOs.UserDTO;
 import at.backend.tourist.places.Models.User;
 import at.backend.tourist.places.Repository.UserRepository;
-import at.backend.tourist.places.Utils.JwtUtil;
+import at.backend.tourist.places.Utils.JWT.JwtBlacklist;
+import at.backend.tourist.places.Utils.JWT.JwtUtil;
 import at.backend.tourist.places.Utils.PasswordHandler;
 import at.backend.tourist.places.Utils.Result;
 import lombok.RequiredArgsConstructor;
@@ -21,12 +22,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final UserMappers userMappers;
     private final JwtUtil jwtUtil;
-
-    private String generateToken(User user) {
-        // Token generation logic (for simplicity, using a hardcoded string)
-        // You can replace this with JWT generation logic
-        return "Bearer " + user.getEmail() + "_token";
-    }
+    private final JwtBlacklist jwtBlacklist;
 
     @Override
     public Result<Void> validateSignup(SignupDTO signupDTO) {
@@ -66,5 +62,25 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public String processLogin(UserDTO userDTO) {
         return jwtUtil.generateToken(userDTO.getEmail(), userDTO.getRole().toString());
+    }
+
+    @Override
+    public void invalidToken(String token) {
+        jwtBlacklist.invalidateToken(token);
+    }
+
+    @Override
+    public String generateResetToken(String email) {
+        return jwtUtil.generateResetToken(email);
+    }
+
+    @Override
+    public String getEmailFromToken(String email) {
+        return jwtUtil.getEmailFromToken(email);
+    }
+
+    @Override
+    public boolean isTokenValid(String token) {
+        return jwtUtil.validateToken(token);
     }
 }

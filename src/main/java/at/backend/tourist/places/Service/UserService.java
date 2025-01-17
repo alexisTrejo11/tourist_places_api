@@ -6,4 +6,5 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 public interface UserService extends CommonService<UserDTO, SignupDTO> {
     UserDetails loadUserByUsername(String email);
+    void updatePassword(String email, String newPassword);
 }

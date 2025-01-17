@@ -5,6 +5,7 @@ import at.backend.tourist.places.DTOs.SignupDTO;
 import at.backend.tourist.places.DTOs.UserDTO;
 import at.backend.tourist.places.Models.User;
 import at.backend.tourist.places.Repository.UserRepository;
+import at.backend.tourist.places.Utils.CustomOAuth2User;
 import at.backend.tourist.places.Utils.PasswordHandler;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -64,12 +65,28 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + email));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
+
+        // Oauth User
+        if (user.getPassword() == null) {
+            return new CustomOAuth2User(user.getEmail(), user.getRole());
+        }
 
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
                 user.getPassword(),
                 Collections.emptyList()
         );
+    }
+
+    @Override
+    public void updatePassword(String email, String newPassword) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
+
+        String hashedPassword = PasswordHandler.hashPassword(user.getPassword());
+        user.setPassword(hashedPassword);
+
+        userRepository.save(user);
     }
 }

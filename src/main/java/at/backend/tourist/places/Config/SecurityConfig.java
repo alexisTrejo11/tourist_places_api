@@ -2,14 +2,16 @@ package at.backend.tourist.places.Config;
 
 import at.backend.tourist.places.Models.User;
 import at.backend.tourist.places.Repository.UserRepository;
+import at.backend.tourist.places.Service.UserService;
 import at.backend.tourist.places.Utils.Enum.Role;
-import at.backend.tourist.places.Utils.JwtAuthenticationFilter;
-import at.backend.tourist.places.Utils.JwtUtil;
+import at.backend.tourist.places.Utils.JWT.JwtAuthenticationFilter;
+import at.backend.tourist.places.Utils.JWT.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -44,27 +46,34 @@ public class SecurityConfig {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private UserService userService;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/signup", "/login").permitAll()
-                        .anyRequest().permitAll()
+                        // Public Access
+                        .requestMatchers("/signup", "/login", "/auth/**").permitAll()
+                        .requestMatchers("/login/oauth2/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/**").permitAll()
+
+                        .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .userService(oAuth2UserService())
-                        )
+                        .userInfoEndpoint(userInfo -> userInfo.userService(oAuth2UserService()))
                         .successHandler(this::successHandler)
                 )
-                .formLogin(form -> form
-                        .loginPage("/login")
-                        .permitAll()
-                ).sessionManagement(session -> session
+                .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(handling -> handling
+                        .authenticationEntryPoint((request, response, authException) -> {
+                           jwtAuthFilter.validateTokenFormat(request, response, authException);
+                        })
+                );
 
         return http.build();
     }
@@ -74,7 +83,6 @@ public class SecurityConfig {
 
         return request -> {
             OAuth2User oauth2User = delegate.loadUser(request);
-
             String email = oauth2User.getAttribute("email");
             String name = oauth2User.getAttribute("name");
 
@@ -89,7 +97,7 @@ public class SecurityConfig {
                     });
 
             Map<String, Object> attributes = oauth2User.getAttributes();
-            List<GrantedAuthority> authorities = new ArrayList<>(oauth2User.getAuthorities());
+            List<GrantedAuthority> authorities = new ArrayList<>();
             authorities.add(new SimpleGrantedAuthority(user.getRole().toString()));
 
             return new DefaultOAuth2User(authorities, attributes, "email");
@@ -106,6 +114,8 @@ public class SecurityConfig {
                 .findFirst()
                 .map(GrantedAuthority::getAuthority)
                 .orElse(Role.VIEWER.toString());
+
+        System.out.println("Roles: " + oauth2User.getAuthorities());
 
         String token = jwtUtil.generateToken(email, role);
 
