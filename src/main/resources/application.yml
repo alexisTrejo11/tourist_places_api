@@ -20,6 +20,22 @@ spring:
             user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
             user-name-attribute: sub
 
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    protocol: ${MAIL_PROTOCOL}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: ${MAIL_CONNECTION_TIMEOUT}
+          timeout: ${MAIL_TIMEOUT}
+          writetimeout: ${MAIL_WRITE_TIMEOUT}
+
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}

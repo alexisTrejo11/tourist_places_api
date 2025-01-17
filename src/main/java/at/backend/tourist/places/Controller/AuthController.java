@@ -65,9 +65,6 @@ public class AuthController {
     @PostMapping("{email}/reset-password-request")
     public ResponseEntity<String> resetPasswordRequest(@PathVariable String email) {
         UserDetails user = userService.loadUserByUsername(email);
-        if (user == null) {
-            return ResponseEntity.badRequest().body("User not found with email provided");
-        }
 
         String resetToken = authService.generateResetToken(email);
 
@@ -78,7 +75,7 @@ public class AuthController {
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordDTO dto) {
+    public ResponseEntity<String> resetPassword(@Valid @RequestBody ResetPasswordDTO dto) {
         if (!authService.isTokenValid(dto.getToken())) {
             return ResponseEntity.badRequest().body("Invalid or Expired Token");
         }

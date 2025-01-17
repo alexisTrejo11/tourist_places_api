@@ -84,7 +84,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
 
-        String hashedPassword = PasswordHandler.hashPassword(user.getPassword());
+        String hashedPassword = PasswordHandler.hashPassword(newPassword);
         user.setPassword(hashedPassword);
 
         userRepository.save(user);
