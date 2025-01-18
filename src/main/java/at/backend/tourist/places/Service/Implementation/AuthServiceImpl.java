@@ -78,6 +78,8 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public String processLogin(UserDTO userDTO) {
+        userRepository.updateLastLoginByEmail(userDTO.getEmail());
+
         return jwtUtil.generateToken(userDTO.getEmail(), userDTO.getRole().toString());
     }
 
