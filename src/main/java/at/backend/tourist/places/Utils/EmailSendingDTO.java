@@ -16,7 +16,12 @@ public class EmailSendingDTO {
       return new EmailSendingDTO(email,token, SendingType.RESET_PASSWORD_TOKEN);
     };
 
+    public static EmailSendingDTO generateActivateAccountToken(String email, String token) {
+        return new EmailSendingDTO(email, token, SendingType.ACTIVATE_ACCOUNT_TOKEN);
+    };
+
     public enum SendingType {
         RESET_PASSWORD_TOKEN,
+        ACTIVATE_ACCOUNT_TOKEN
     }
 }

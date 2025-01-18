@@ -1,4 +1,4 @@
-package at.backend.tourist.places.Service;
+package at.backend.tourist.places.Service.Implementation;
 
 import at.backend.tourist.places.AutoMappers.ActivityMapper;
 import at.backend.tourist.places.DTOs.ActivityDTO;
@@ -7,6 +7,7 @@ import at.backend.tourist.places.Models.Activity;
 import at.backend.tourist.places.Models.TouristPlace;
 import at.backend.tourist.places.Repository.ActivityRepository;
 import at.backend.tourist.places.Repository.TouristPlaceRepository;
+import at.backend.tourist.places.Service.ActivityService;
 import at.backend.tourist.places.Utils.Result;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;

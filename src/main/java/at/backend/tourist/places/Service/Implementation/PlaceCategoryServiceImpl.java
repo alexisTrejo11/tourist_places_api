@@ -1,13 +1,13 @@
-package at.backend.tourist.places.Service;
+package at.backend.tourist.places.Service.Implementation;
 
 import at.backend.tourist.places.AutoMappers.PlaceCategoryMapper;
 import at.backend.tourist.places.DTOs.PlaceCategoryDTO;
 import at.backend.tourist.places.DTOs.PlaceCategoryInsertDTO;
 import at.backend.tourist.places.Models.PlaceCategory;
 import at.backend.tourist.places.Repository.PlaceCategoryRepository;
+import at.backend.tourist.places.Service.PlaceCategoryService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

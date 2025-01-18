@@ -8,8 +8,10 @@ import at.backend.tourist.places.Utils.Result;
 public interface AuthService {
     Result<Void> validateSignup(SignupDTO signupDTO);
     Result<UserDTO> validateLogin(LoginDTO signupDTO);
+    Result<Void> validatePasswordFormat(String requestPassword);
 
-    String processSignup(UserDTO signupDTO);
+
+    void processSignup(UserDTO signupDTO);
     String processLogin(UserDTO loginDTO);
 
     void invalidToken(String token);

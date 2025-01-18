@@ -1,5 +1,6 @@
-package at.backend.tourist.places.Service;
+package at.backend.tourist.places.Service.Implementation;
 
+import at.backend.tourist.places.Service.SendingService;
 import at.backend.tourist.places.Utils.EmailSendingDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,7 @@ public class SendingServiceImpl implements SendingService {
     public void sendEmail(EmailSendingDTO emailSendingDTO) {
         switch (emailSendingDTO.getType()) {
             case RESET_PASSWORD_TOKEN -> sendResetPasswordTokenEmail(emailSendingDTO);
+            case ACTIVATE_ACCOUNT_TOKEN -> sendValidateAccountEmail(emailSendingDTO);
         }
     }
 
@@ -45,5 +47,22 @@ public class SendingServiceImpl implements SendingService {
 
         mailSender.send(preparator);
         log.info("Reset password email successfully send to {}", emailSendingDTO.getEmail());
+    }
+
+    private void sendValidateAccountEmail(EmailSendingDTO emailSendingDTO) {
+        Context context = new Context();
+        context.setVariable("verificationCode", emailSendingDTO.getToken());
+
+        String htmlContent = templateEngine.process("account-registration-email", context);
+
+        MimeMessagePreparator preparator = mimeMessage -> {
+            MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage, true);
+            messageHelper.setTo(emailSendingDTO.getEmail());
+            messageHelper.setSubject("Activate Account");
+            messageHelper.setText(htmlContent, true);
+        };
+
+        mailSender.send(preparator);
+        log.info("Activate account email successfully send to {}", emailSendingDTO.getEmail());
     }
 }

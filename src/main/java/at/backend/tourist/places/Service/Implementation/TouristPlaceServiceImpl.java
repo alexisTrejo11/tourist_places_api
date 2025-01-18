@@ -1,4 +1,4 @@
-package at.backend.tourist.places.Service;
+package at.backend.tourist.places.Service.Implementation;
 
 import at.backend.tourist.places.AutoMappers.TouristPlaceMapper;
 import at.backend.tourist.places.DTOs.TouristPlaceDTO;
@@ -10,6 +10,7 @@ import at.backend.tourist.places.Models.TouristPlace;
 import at.backend.tourist.places.Repository.CountryRepository;
 import at.backend.tourist.places.Repository.PlaceCategoryRepository;
 import at.backend.tourist.places.Repository.TouristPlaceRepository;
+import at.backend.tourist.places.Service.TouristPlaceService;
 import at.backend.tourist.places.Utils.PlaceRelationships;
 import at.backend.tourist.places.Utils.Result;
 import jakarta.persistence.EntityNotFoundException;

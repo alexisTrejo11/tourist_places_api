@@ -1,22 +1,24 @@
-package at.backend.tourist.places.Service;
+package at.backend.tourist.places.Service.Implementation;
 
 import at.backend.tourist.places.AutoMappers.UserMappers;
 import at.backend.tourist.places.DTOs.SignupDTO;
 import at.backend.tourist.places.DTOs.UserDTO;
 import at.backend.tourist.places.Models.User;
 import at.backend.tourist.places.Repository.UserRepository;
+import at.backend.tourist.places.Service.UserService;
 import at.backend.tourist.places.Utils.CustomOAuth2User;
 import at.backend.tourist.places.Utils.PasswordHandler;
+import at.backend.tourist.places.Utils.Result;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 @RequiredArgsConstructor
 @Service
@@ -24,18 +26,6 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMappers userMappers;
-
-    @Override
-    public UserDTO create(SignupDTO signupDTO) {
-       User user = userMappers.DTOToEntity(signupDTO);
-
-       String hashedPassword = PasswordHandler.hashPassword(user.getPassword());
-       user.setPassword(hashedPassword);
-
-       userRepository.saveAndFlush(user);
-
-       return userMappers.entityToDTO(user);
-    }
 
     @Override
     public UserDTO getById(Long id) {
@@ -50,6 +40,19 @@ public class UserServiceImpl implements UserService {
                 .stream()
                 .map(userMappers::entityToDTO)
                 .toList();
+    }
+
+    @Override
+    public UserDTO create(SignupDTO signupDTO) {
+       User user = userMappers.DTOToEntity(signupDTO);
+
+       String hashedPassword = PasswordHandler.hashPassword(user.getPassword());
+       user.setPassword(hashedPassword);
+       user.setActivated(false);
+
+       userRepository.saveAndFlush(user);
+
+       return userMappers.entityToDTO(user);
     }
 
     @Override
@@ -86,6 +89,16 @@ public class UserServiceImpl implements UserService {
 
         String hashedPassword = PasswordHandler.hashPassword(newPassword);
         user.setPassword(hashedPassword);
+
+        userRepository.save(user);
+    }
+
+    @Override
+    public void activateUser(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
+
+        user.setActivated(true);
 
         userRepository.save(user);
     }

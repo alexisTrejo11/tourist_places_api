@@ -11,6 +11,11 @@ public class PasswordHandler {
     }
 
     public static boolean validatePassword(String plainPassword, String hashedPassword) {
+        // For oauth2 users that doesn't have password
+        if (hashedPassword == null) {
+            return false;
+        }
+
         return passwordEncoder.matches(plainPassword, hashedPassword);
     }
 }

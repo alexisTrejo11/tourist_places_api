@@ -34,9 +34,25 @@ public class AuthController {
 
         UserDTO userDTO = userService.create(signupDTO);
 
-        String JWT = authService.processSignup(userDTO);
+        authService.processSignup(userDTO);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(JWT);
+        return ResponseEntity.status(HttpStatus.CREATED).body("An Email will be sending the email provided. " +
+                "Use that token to activate your account.");
+    }
+
+
+    @PostMapping("/activate-account/{token}")
+    public ResponseEntity<String> activateAccount(@Valid @PathVariable String token) {
+        if (!authService.isTokenValid(token)) {
+            return ResponseEntity.badRequest().body("Invalid or Expired Token");
+        }
+
+        String email = authService.getEmailFromToken(token);
+        userService.activateUser(email);
+
+        authService.invalidToken(token);
+
+        return ResponseEntity.ok("Account Successfully Activated");
     }
 
     @PostMapping("/login")
@@ -88,6 +104,5 @@ public class AuthController {
 
         return ResponseEntity.ok("Password successfully changed");
     }
-
 
 }

@@ -1,8 +1,9 @@
-package at.backend.tourist.places.Service;
+package at.backend.tourist.places.Service.Implementation;
 
 import at.backend.tourist.places.AutoMappers.CountryMapper;
 import at.backend.tourist.places.DTOs.CountryDTO;
 import at.backend.tourist.places.DTOs.CountryInsertDTO;
+import at.backend.tourist.places.Service.CountryService;
 import at.backend.tourist.places.Utils.Enum.Continent;
 import at.backend.tourist.places.Models.Country;
 import at.backend.tourist.places.Repository.CountryRepository;

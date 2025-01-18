@@ -71,4 +71,13 @@ public class JwtUtil {
                 .signWith(getSigningKey())
                 .compact();
     }
+
+    public String generateActivateToken(String email) {
+        return Jwts.builder()
+                .setSubject(email)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + expiration * 1000))
+                .signWith(getSigningKey())
+                .compact();
+    }
 }
