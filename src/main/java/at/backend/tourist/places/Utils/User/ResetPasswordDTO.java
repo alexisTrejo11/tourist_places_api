@@ -1,4 +1,4 @@
-package at.backend.tourist.places.Utils;
+package at.backend.tourist.places.Utils.User;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;

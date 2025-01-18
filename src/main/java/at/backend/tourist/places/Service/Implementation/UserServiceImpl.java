@@ -7,19 +7,20 @@ import at.backend.tourist.places.DTOs.UserInsertDTO;
 import at.backend.tourist.places.Models.User;
 import at.backend.tourist.places.Repository.UserRepository;
 import at.backend.tourist.places.Service.UserService;
-import at.backend.tourist.places.Utils.CustomOAuth2User;
-import at.backend.tourist.places.Utils.PasswordHandler;
-import at.backend.tourist.places.Utils.Result;
+import at.backend.tourist.places.Utils.Enum.Role;
+import at.backend.tourist.places.Utils.User.CustomOAuth2User;
+import at.backend.tourist.places.Utils.User.PasswordHandler;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.regex.Pattern;
+import java.util.*;
 
 @RequiredArgsConstructor
 @Service
@@ -33,6 +34,18 @@ public class UserServiceImpl implements UserService {
         Optional<User> user = userRepository.findById(id);
 
         return user.map(userMappers::entityToDTO).orElse(null);
+    }
+
+    @Override
+    public Page<UserDTO> getByRole(Role role, Pageable pageable) {
+        Page<User> userPage =  userRepository.findByRole(role, pageable);
+        return userPage.map(userMappers::entityToDTO);
+    }
+
+    @Override
+    public UserDTO getByEmail(String email) {
+        Optional<User> user = userRepository.findByEmail(email);
+        return user.map(userMappers::entityToDTO).orElse(new UserDTO());
     }
 
     @Override
@@ -55,6 +68,8 @@ public class UserServiceImpl implements UserService {
 
        return userMappers.entityToDTO(user);
     }
+
+
 
     @Override
     public UserDTO create(UserInsertDTO insertDTO) {
@@ -85,7 +100,9 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
 
-        // Oauth User
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+
         if (user.getPassword() == null) {
             return new CustomOAuth2User(user.getEmail(), user.getRole());
         }
@@ -93,9 +110,10 @@ public class UserServiceImpl implements UserService {
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
                 user.getPassword(),
-                Collections.emptyList()
+                authorities
         );
     }
+
 
     @Override
     public void updatePassword(String email, String newPassword) {
@@ -104,6 +122,16 @@ public class UserServiceImpl implements UserService {
 
         String hashedPassword = PasswordHandler.hashPassword(newPassword);
         user.setPassword(hashedPassword);
+
+        userRepository.save(user);
+    }
+
+    @Override
+    public void updateRole(Long id, Role role) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: Id " + id));
+
+        user.setRole(role);
 
         userRepository.save(user);
     }

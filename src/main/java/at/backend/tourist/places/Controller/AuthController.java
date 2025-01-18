@@ -7,7 +7,7 @@ import at.backend.tourist.places.Service.AuthService;
 import at.backend.tourist.places.Service.SendingService;
 import at.backend.tourist.places.Service.UserService;
 import at.backend.tourist.places.Utils.EmailSendingDTO;
-import at.backend.tourist.places.Utils.ResetPasswordDTO;
+import at.backend.tourist.places.Utils.User.ResetPasswordDTO;
 import at.backend.tourist.places.Utils.Result;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -40,21 +40,6 @@ public class AuthController {
                 "Use that token to activate your account.");
     }
 
-
-    @PostMapping("/activate-account/{token}")
-    public ResponseEntity<String> activateAccount(@Valid @PathVariable String token) {
-        if (!authService.isTokenValid(token)) {
-            return ResponseEntity.badRequest().body("Invalid or Expired Token");
-        }
-
-        String email = authService.getEmailFromToken(token);
-        userService.activateUser(email);
-
-        authService.invalidToken(token);
-
-        return ResponseEntity.ok("Account Successfully Activated");
-    }
-
     @PostMapping("/login")
     public ResponseEntity<String> login(@Valid @RequestBody LoginDTO loginDTO) {
         Result<UserDTO> validateLogin = authService.validateLogin(loginDTO);
@@ -77,6 +62,19 @@ public class AuthController {
         return ResponseEntity.badRequest().body("Invalid Token");
     }
 
+    @PostMapping("/activate-account/{token}")
+    public ResponseEntity<String> activateAccount(@Valid @PathVariable String token) {
+        if (!authService.isTokenValid(token)) {
+            return ResponseEntity.badRequest().body("Invalid or Expired Token");
+        }
+
+        String email = authService.getEmailFromToken(token);
+        userService.activateUser(email);
+
+        authService.invalidToken(token);
+
+        return ResponseEntity.ok("Account Successfully Activated");
+    }
 
     @PostMapping("{email}/reset-password-request")
     public ResponseEntity<String> resetPasswordRequest(@PathVariable String email) {
@@ -104,5 +102,4 @@ public class AuthController {
 
         return ResponseEntity.ok("Password successfully changed");
     }
-
 }

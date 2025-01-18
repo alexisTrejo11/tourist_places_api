@@ -11,7 +11,7 @@ import at.backend.tourist.places.Service.SendingService;
 import at.backend.tourist.places.Utils.EmailSendingDTO;
 import at.backend.tourist.places.Utils.JWT.JwtBlacklist;
 import at.backend.tourist.places.Utils.JWT.JwtUtil;
-import at.backend.tourist.places.Utils.PasswordHandler;
+import at.backend.tourist.places.Utils.User.PasswordHandler;
 import at.backend.tourist.places.Utils.Result;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;

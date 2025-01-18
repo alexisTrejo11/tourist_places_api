@@ -1,4 +1,4 @@
-package at.backend.tourist.places.Utils;
+package at.backend.tourist.places.Utils.User;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 

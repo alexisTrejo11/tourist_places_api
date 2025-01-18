@@ -1,7 +1,6 @@
-package at.backend.tourist.places.Utils;
+package at.backend.tourist.places.Utils.User;
 
 import at.backend.tourist.places.Utils.Enum.Role;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;

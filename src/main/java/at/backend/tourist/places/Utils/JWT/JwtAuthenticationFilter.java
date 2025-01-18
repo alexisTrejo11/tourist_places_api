@@ -31,16 +31,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         String token = extractToken(request);
+        System.out.println("Token Extracted: " + token);
 
-        if (token != null && jwtUtil.validateToken(token)) {
-            String email = jwtUtil.getEmailFromToken(token);
-            UserDetails userDetails = userService.loadUserByUsername(email);
+        if (token != null) {
+            if (jwtUtil.validateToken(token)) {
+                System.out.println("Token is valid");
+                String email = jwtUtil.getEmailFromToken(token);
+                System.out.println("Email from Token: " + email);
 
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                UserDetails userDetails = userService.loadUserByUsername(email);
+                System.out.println("UserDetails: " + userDetails.getUsername());
+                System.out.println("Authorities: " + userDetails.getAuthorities());
 
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                System.out.println("Authentication set in SecurityContext");
+            } else {
+                System.out.println("Invalid Token");
+            }
+        } else {
+            System.out.println("No token found in request");
         }
 
         filterChain.doFilter(request, response);

@@ -54,11 +54,18 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        // Public Access
+                        // Auth
                         .requestMatchers("/signup", "/login", "/auth/**").permitAll()
                         .requestMatchers("/login/oauth2/**").permitAll()
+
+                        // User
+                        .requestMatchers("/v1/api/users/me").authenticated()
+                        .requestMatchers("/v1/api/users/**").hasAuthority("ROLE_ADMIN")
+
+                        // Public Access
                         .requestMatchers(HttpMethod.GET, "/**").permitAll()
 
+                        // Requires Login
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
@@ -99,7 +106,7 @@ public class SecurityConfig {
 
             Map<String, Object> attributes = oauth2User.getAttributes();
             List<GrantedAuthority> authorities = new ArrayList<>();
-            authorities.add(new SimpleGrantedAuthority(user.getRole().toString()));
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
 
             return new DefaultOAuth2User(authorities, attributes, "email");
         };
