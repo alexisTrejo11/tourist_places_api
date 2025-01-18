@@ -3,6 +3,7 @@ package at.backend.tourist.places.Service.Implementation;
 import at.backend.tourist.places.AutoMappers.UserMappers;
 import at.backend.tourist.places.DTOs.SignupDTO;
 import at.backend.tourist.places.DTOs.UserDTO;
+import at.backend.tourist.places.DTOs.UserInsertDTO;
 import at.backend.tourist.places.Models.User;
 import at.backend.tourist.places.Repository.UserRepository;
 import at.backend.tourist.places.Service.UserService;
@@ -56,6 +57,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserDTO create(UserInsertDTO insertDTO) {
+        User user = userMappers.DTOToEntity(insertDTO);
+
+        String hashedPassword = PasswordHandler.hashPassword(user.getPassword());
+        user.setPassword(hashedPassword);
+        user.setActivated(true);
+
+        userRepository.saveAndFlush(user);
+
+        return userMappers.entityToDTO(user);
+    }
+
+    @Override
     public void delete(Long id) {
         boolean isUserExisting = userRepository.existsById(id);
         if (!isUserExisting) {
@@ -64,6 +78,7 @@ public class UserServiceImpl implements UserService {
 
         userRepository.deleteById(id);
     }
+
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {

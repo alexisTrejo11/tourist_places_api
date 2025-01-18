@@ -92,6 +92,7 @@ public class SecurityConfig {
                         newUser.setEmail(email);
                         newUser.setName(name);
                         newUser.setProvider("google");
+                        newUser.setActivated(true);
                         newUser.setRole(Role.VIEWER);
                         return userRepository.save(newUser);
                     });
