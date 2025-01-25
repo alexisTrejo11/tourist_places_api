@@ -47,7 +47,10 @@ spring:
     hibernate:
       ddl-auto: update
 
-server:
+
+web:
+  resources:
+    add-mappings: false
   port: ${SERVER_PORT}
 
 jwt:
@@ -56,8 +59,20 @@ jwt:
 
 springdoc:
   api-docs:
+    enabled: true
     path: /v3/api-docs
+
   swagger-ui:
     path: /swagger-ui.html
-    paths-to-match: /**
-    packages-to-scan: microservice.enrollment_service
+    operationsSorter: alpha
+    tagsSorter: alpha
+
+  openapi:
+    security:
+      - bearerAuth: []
+    components:
+      securitySchemes:
+        bearerAuth:
+          type: http
+          scheme: bearer
+          bearerFormat: JWT
