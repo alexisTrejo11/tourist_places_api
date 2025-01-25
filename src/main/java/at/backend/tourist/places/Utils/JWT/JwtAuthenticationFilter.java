@@ -31,9 +31,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         String token = extractToken(request);
-        System.out.println("Token Extracted: " + token);
 
         if (token != null) {
+            System.out.println("Token Extracted: " + token);
+
             if (jwtUtil.validateToken(token)) {
                 System.out.println("Token is valid");
                 String email = jwtUtil.getEmailFromToken(token);
@@ -52,8 +53,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             } else {
                 System.out.println("Invalid Token");
             }
-        } else {
-            System.out.println("No token found in request");
         }
 
         filterChain.doFilter(request, response);
