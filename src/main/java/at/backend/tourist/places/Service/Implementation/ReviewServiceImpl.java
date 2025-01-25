@@ -3,15 +3,20 @@ package at.backend.tourist.places.Service.Implementation;
 import at.backend.tourist.places.AutoMappers.ReviewMapper;
 import at.backend.tourist.places.DTOs.ReviewDTO;
 import at.backend.tourist.places.DTOs.ReviewInsertDTO;
+import at.backend.tourist.places.DTOs.ReviewUpdateDTO;
 import at.backend.tourist.places.Models.Review;
 import at.backend.tourist.places.Models.TouristPlace;
+import at.backend.tourist.places.Models.User;
 import at.backend.tourist.places.Repository.ReviewRepository;
 import at.backend.tourist.places.Repository.TouristPlaceRepository;
+import at.backend.tourist.places.Repository.UserRepository;
 import at.backend.tourist.places.Service.ReviewService;
 import at.backend.tourist.places.Utils.Result;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,6 +28,7 @@ import java.util.Optional;
 public class ReviewServiceImpl implements ReviewService {
 
     private final ReviewRepository reviewRepository;
+    private final UserRepository userRepository;
     private final TouristPlaceRepository touristPlaceRepository;
     private final ReviewMapper reviewMapper;
 
@@ -44,11 +50,10 @@ public class ReviewServiceImpl implements ReviewService {
                 .toList();
     }
 
-
     @Override
     public List<ReviewDTO> getByTouristPlace(Long touristPlaceId) {
-        boolean isPlaceExisiting = touristPlaceRepository.existsById(touristPlaceId);
-        if (!isPlaceExisiting) {
+        boolean isPlaceExisting = touristPlaceRepository.existsById(touristPlaceId);
+        if (!isPlaceExisting) {
             return null;
         }
 
@@ -60,29 +65,57 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public Result<TouristPlace> validate(ReviewInsertDTO insertDTO) {
-        Optional<TouristPlace> touristPlace = touristPlaceRepository.findById(insertDTO.getPlaceId());
-        if (touristPlace.isEmpty()) {
-            return Result.failure("Tourist place ID");
-        }
+    public Page<ReviewDTO> getReviewByEmail(String email, Pageable pageable) {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User not found"));
 
+        Page<Review> reviewsPage = reviewRepository.findByAuthorId(user.getId(), pageable);
+        return reviewsPage.map(reviewMapper::entityToDTO);
+    }
+
+    @Override
+    public Result<Void> validate(ReviewInsertDTO insertDTO) {
         if (insertDTO.getRating() < 0 ||insertDTO.getRating() > 10) {
             return Result.failure("Rating out of range");
         }
 
-        return Result.success(touristPlace.get());
+        return Result.success();
+    }
+
+    @Override
+    public Result<Void> validate(ReviewUpdateDTO updateDTO, String userEmail) {
+        if (updateDTO.getRating() < 0 ||updateDTO.getRating() > 10) {
+            return Result.failure("Rating out of range");
+        }
+
+        validateUserBelonging(updateDTO.getReviewId(), userEmail);
+
+        return Result.success();
     }
 
     @Override
     public ReviewDTO create(ReviewInsertDTO insertDTO) {
-        log.info("Starting to create review for tourist place: {}", insertDTO.getTouristPlace());
+        log.info("Starting to create review for tourist place: {}", insertDTO.getPlaceId());
 
         Review review = reviewMapper.DTOToEntity(insertDTO);
-        review.setPlace(insertDTO.getTouristPlace());
+        addRelationship(insertDTO, review);
 
         reviewRepository.saveAndFlush(review);
 
         log.info("Review created successfully with ID: {}", review.getId());
+
+        return reviewMapper.entityToDTO(review);
+    }
+
+    public ReviewDTO update(ReviewUpdateDTO updateDTO, String email) {
+        log.info("Starting to update review for tourist place: {}", updateDTO.getReviewId());
+        Review review = reviewRepository.findById(updateDTO.getReviewId())
+                .orElseThrow(() -> new EntityNotFoundException("Review not Found"));
+
+        reviewMapper.update(review, updateDTO);
+
+        reviewRepository.saveAndFlush(review);
+
+        log.info("Review updated successfully with ID: {}", review.getId());
 
         return reviewMapper.entityToDTO(review);
     }
@@ -100,4 +133,45 @@ public class ReviewServiceImpl implements ReviewService {
         reviewRepository.deleteById(id);
         log.info("Review with ID: {} deleted successfully", id);
     }
+
+    @Override
+    public void delete(Long id, String email) {
+        log.info("Attempting to delete review with ID: {} and email {}", id, email);
+
+        validateUserBelonging(id, email);
+
+        reviewRepository.deleteById(id);
+        log.info("Review with ID: {}  and email {} deleted successfully", id, email);
+    }
+
+    private void addRelationship(ReviewInsertDTO insertDTO, Review review) {
+        review.setAuthor(getAuthor(insertDTO.getAuthorEmail()));
+        review.setPlace(getPlace(insertDTO.getPlaceId()));
+    }
+
+    private User getAuthor(String authorEmail) {
+        if (authorEmail == null) {
+            throw new RuntimeException("Author not provided");
+        }
+
+        return userRepository.findByEmail(authorEmail)
+                .orElseThrow(() -> new EntityNotFoundException("Email not found"));
+    }
+
+    private TouristPlace getPlace(Long placeId) {
+        return touristPlaceRepository.findById(placeId)
+                .orElseThrow(() -> new EntityNotFoundException("Place not found"));
+    }
+
+    private void validateUserBelonging(Long reviewId, String userEmail) {
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        // Check if user make the request comment
+        Optional<Review> review = reviewRepository.findByIdAndAuthorId(reviewId, user.getId());
+        if (review.isEmpty()) {
+            throw new EntityNotFoundException("Review not found");
+        }
+    }
+
 }

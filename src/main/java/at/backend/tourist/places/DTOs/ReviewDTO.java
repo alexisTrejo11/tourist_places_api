@@ -21,8 +21,8 @@ public class ReviewDTO {
     private String comment;
 
     @Schema(description = "Name of the review's author", example = "John Doe", required = true)
-    @JsonProperty("author")
-    private String author;
+    @JsonProperty("author_id")
+    private String authorId;
 
     @Schema(description = "ID of the place being reviewed", example = "101", required = true)
     @JsonProperty("place_id")

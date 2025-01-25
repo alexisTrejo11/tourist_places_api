@@ -23,7 +23,7 @@ import java.util.List;
 @RestController
 @RequestMapping("v1/api/reviews")
 @RequiredArgsConstructor
-@Tag(name = "Review Management", description = "Endpoints for managing reviews")
+@Tag(name = "Review Management", description = "Endpoints for managing reviews as Admin")
 @SecurityRequirement(name = "bearerAuth")
 public class ReviewController {
 
@@ -76,9 +76,8 @@ public class ReviewController {
     })
     @PostMapping
     public ResponseEntity<ReviewDTO> createReview(@Valid @RequestBody ReviewInsertDTO insertDTO) {
-        Result<TouristPlace> validationResult = reviewService.validate(insertDTO);
+        Result<Void> validationResult = reviewService.validate(insertDTO);
 
-        insertDTO.setTouristPlace(validationResult.getData());
         ReviewDTO createdReview = reviewService.create(insertDTO);
 
         touristPlaceService.updatePlaceRating(createdReview.getPlaceId());

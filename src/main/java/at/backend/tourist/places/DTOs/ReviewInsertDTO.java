@@ -1,9 +1,7 @@
 package at.backend.tourist.places.DTOs;
 
-import at.backend.tourist.places.Models.TouristPlace;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
@@ -23,10 +21,8 @@ public class ReviewInsertDTO {
     private String comment = "";
 
     @Schema(description = "Name of the review's author", example = "Jane Doe")
-    @JsonProperty("author")
-    @NotNull(message = "author can't be null")
-    @NotBlank(message = "author can't be blank")
-    private String author = "";
+    @JsonProperty("author_email")
+    private String authorEmail = "";
 
     @Schema(description = "ID of the place being reviewed", example = "101")
     @JsonProperty("place_id")
@@ -34,6 +30,5 @@ public class ReviewInsertDTO {
     @Positive(message = "place_id can't be negative")
     private Long placeId;
 
-    @Schema(description = "Tourist place related to the review (optional)", hidden = true)
-    private TouristPlace touristPlace;
+
 }

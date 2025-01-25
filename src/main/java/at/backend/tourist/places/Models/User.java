@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Data
@@ -35,6 +36,9 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private Role role = Role.VIEWER;
+
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Review> reviews;
 
     @PrePersist
     private void onCreate() {
