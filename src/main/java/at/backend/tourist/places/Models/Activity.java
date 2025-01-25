@@ -27,6 +27,8 @@ public class Activity {
     @Column(name = "duration", nullable = false)
     private String duration;
 
+
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "place_id", nullable = false)
     private TouristPlace touristPlace;

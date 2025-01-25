@@ -36,6 +36,8 @@ public class TouristPlace {
     @Column(name = "price_range")
     private String priceRange;
 
+
+
     @ManyToOne
     @JoinColumn(name = "country_id")
     private Country country;
@@ -49,4 +51,5 @@ public class TouristPlace {
 
     @OneToMany(mappedBy = "place", fetch = FetchType.LAZY)
     private List<Review> reviews;
+
 }
