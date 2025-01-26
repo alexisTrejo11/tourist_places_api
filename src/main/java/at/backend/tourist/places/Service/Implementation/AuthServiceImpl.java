@@ -2,15 +2,16 @@ package at.backend.tourist.places.Service.Implementation;
 
 import at.backend.tourist.places.AutoMappers.UserMappers;
 import at.backend.tourist.places.DTOs.LoginDTO;
+import at.backend.tourist.places.DTOs.LoginResponseDTO;
 import at.backend.tourist.places.DTOs.SignupDTO;
 import at.backend.tourist.places.DTOs.UserDTO;
+import at.backend.tourist.places.JWT.RedisTokenService;
 import at.backend.tourist.places.Models.User;
 import at.backend.tourist.places.Repository.UserRepository;
 import at.backend.tourist.places.Service.AuthService;
 import at.backend.tourist.places.Service.SendingService;
 import at.backend.tourist.places.Utils.EmailSendingDTO;
-import at.backend.tourist.places.Utils.JWT.JwtBlacklist;
-import at.backend.tourist.places.Utils.JWT.JwtUtil;
+import at.backend.tourist.places.JWT.JwtService;
 import at.backend.tourist.places.Utils.User.PasswordHandler;
 import at.backend.tourist.places.Utils.Result;
 import lombok.RequiredArgsConstructor;
@@ -26,9 +27,9 @@ public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
     private final UserMappers userMappers;
-    private final JwtUtil jwtUtil;
-    private final JwtBlacklist jwtBlacklist;
+    private final JwtService jwtService;
     private final SendingService sendingService;
+    private final RedisTokenService redisTokenService;
 
     @Override
     public Result<Void> validateSignup(SignupDTO signupDTO) {
@@ -70,38 +71,46 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Async("taskExecutor")
     public void processSignup(UserDTO userDTO) {
-        String activateToken = jwtUtil.generateActivateToken(userDTO.getEmail());
-        EmailSendingDTO emailSendingDTO = EmailSendingDTO.generateActivateAccountToken(userDTO.getEmail(), activateToken);
+        String activateToken = jwtService.generateActivateToken(userDTO.getEmail());
+        redisTokenService.saveToken(activateToken, userDTO.getEmail(), "valid_token",10800); // 3hrs
 
+        EmailSendingDTO emailSendingDTO = EmailSendingDTO.generateActivateAccountToken(userDTO.getEmail(), activateToken);
         sendingService.sendEmail(emailSendingDTO);
     }
 
     @Override
-    public String processLogin(UserDTO userDTO) {
+    public LoginResponseDTO processLogin(UserDTO userDTO) {
         userRepository.updateLastLoginByEmail(userDTO.getEmail());
 
-        return jwtUtil.generateToken(userDTO.getEmail(), userDTO.getRole().toString());
+        return jwtService.generateLoginTokens(userDTO.getEmail(), userDTO.getRole().toString());
     }
 
     @Override
     public void invalidToken(String token) {
-        jwtBlacklist.invalidateToken(token);
+        jwtService.deleteToken(token);
     }
 
     @Override
-    public String generateResetToken(String email) {
-        return jwtUtil.generateResetToken(email);
+    public String processResetPassword(String email) {
+        String resetToken = jwtService.generateResetToken(email);
+
+        redisTokenService.saveToken(resetToken, email, "valid_token",10800); // 3hrs
+
+        return resetToken;
     }
 
-
     @Override
-    public String getEmailFromToken(String email) {
-        return jwtUtil.getEmailFromToken(email);
+    public String getEmailFromToken(String token) {
+        if (token.length() == 6) {
+
+        }
+
+        return jwtService.getEmailFromToken(token);
     }
 
     @Override
     public boolean isTokenValid(String token) {
-        return jwtUtil.validateToken(token);
+        return jwtService.validateToken(token);
     }
 
     @Override

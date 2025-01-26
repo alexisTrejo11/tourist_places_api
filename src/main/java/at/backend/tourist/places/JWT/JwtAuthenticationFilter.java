@@ -1,4 +1,4 @@
-package at.backend.tourist.places.Utils.JWT;
+package at.backend.tourist.places.JWT;
 
 import at.backend.tourist.places.Service.UserService;
 import jakarta.servlet.FilterChain;
@@ -7,7 +7,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,7 +20,7 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Autowired
-    private JwtUtil jwtUtil;
+    private JwtService jwtService;
 
     @Autowired
     private UserService userService;
@@ -35,9 +34,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (token != null) {
             System.out.println("Token Extracted: " + token);
 
-            if (jwtUtil.validateToken(token)) {
+            if (jwtService.validateToken(token)) {
                 System.out.println("Token is valid");
-                String email = jwtUtil.getEmailFromToken(token);
+                String email = jwtService.getEmailFromToken(token);
                 System.out.println("Email from Token: " + email);
 
                 UserDetails userDetails = userService.loadUserByUsername(email);

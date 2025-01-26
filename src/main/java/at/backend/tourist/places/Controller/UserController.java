@@ -4,7 +4,7 @@ import at.backend.tourist.places.DTOs.UserDTO;
 import at.backend.tourist.places.DTOs.UserInsertDTO;
 import at.backend.tourist.places.Service.UserService;
 import at.backend.tourist.places.Utils.Enum.Role;
-import at.backend.tourist.places.Utils.JWT.JwtUtil;
+import at.backend.tourist.places.JWT.JwtService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -31,12 +31,12 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
-    private final JwtUtil jwtUtil;
+    private final JwtService jwtService;
 
     @Operation(summary = "Get current logged-in user", description = "Fetches the details of the currently logged-in user based on the JWT token")
     @GetMapping("/me")
     private ResponseEntity<UserDTO> me(HttpServletRequest request) {
-        String email = jwtUtil.getEmailFromRequest(request);
+        String email = jwtService.getEmailFromRequest(request);
 
         UserDTO user = userService.getByEmail(email);
 

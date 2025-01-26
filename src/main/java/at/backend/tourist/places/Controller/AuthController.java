@@ -1,6 +1,7 @@
 package at.backend.tourist.places.Controller;
 
 import at.backend.tourist.places.DTOs.LoginDTO;
+import at.backend.tourist.places.DTOs.LoginResponseDTO;
 import at.backend.tourist.places.DTOs.SignupDTO;
 import at.backend.tourist.places.DTOs.UserDTO;
 import at.backend.tourist.places.Service.AuthService;
@@ -41,15 +42,15 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@Valid @RequestBody LoginDTO loginDTO) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginDTO loginDTO) {
         Result<UserDTO> validateLogin = authService.validateLogin(loginDTO);
         if (!validateLogin.isSuccess()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(validateLogin.getErrorMessage());
         }
 
-        String JWT = authService.processLogin(validateLogin.getData());
+        LoginResponseDTO responseDTO = authService.processLogin(validateLogin.getData());
 
-        return ResponseEntity.ok(JWT);
+        return ResponseEntity.ok(responseDTO);
     }
 
     @PostMapping("/logout")
@@ -67,7 +68,7 @@ public class AuthController {
         if (!authService.isTokenValid(token)) {
             return ResponseEntity.badRequest().body("Invalid or Expired Token");
         }
-
+        // CustomToken Needs Email
         String email = authService.getEmailFromToken(token);
         userService.activateUser(email);
 
@@ -80,12 +81,13 @@ public class AuthController {
     public ResponseEntity<String> resetPasswordRequest(@PathVariable String email) {
         UserDetails user = userService.loadUserByUsername(email);
 
-        String resetToken = authService.generateResetToken(email);
+        String resetToken = authService.processResetPassword(email);
 
         EmailSendingDTO sendingDTO = EmailSendingDTO.generatePasswordTokenDTO(email, resetToken);
         sendingService.sendEmail(sendingDTO);
 
-        return ResponseEntity.ok("A token will be send to you user email to complete allow your change of password");
+        return ResponseEntity.ok("A token will be send to you user email to complete allow your " +
+                "change of password");
     }
 
     @PostMapping("/reset-password")

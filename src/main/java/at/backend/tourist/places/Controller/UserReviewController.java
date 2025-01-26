@@ -5,7 +5,7 @@ import at.backend.tourist.places.DTOs.ReviewInsertDTO;
 import at.backend.tourist.places.DTOs.ReviewUpdateDTO;
 import at.backend.tourist.places.Service.ReviewService;
 import at.backend.tourist.places.Service.TouristPlaceService;
-import at.backend.tourist.places.Utils.JWT.JwtUtil;
+import at.backend.tourist.places.JWT.JwtService;
 import at.backend.tourist.places.Utils.Result;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserReviewController {
 
     private final ReviewService reviewService;
-    private final JwtUtil jwtUtil;
+    private final JwtService jwtService;
     private final TouristPlaceService touristPlaceService;
 
     @Operation(summary = "Get user reviews", description = "Fetches user reviews with pagination support.")
@@ -53,7 +53,7 @@ public class UserReviewController {
             @Parameter(description = "Sort direction (ASC/DESC)", example = "DESC")
             @RequestParam(defaultValue = "DESC") String sortDirection) {
 
-        String email = jwtUtil.getEmailFromRequest(request);
+        String email = jwtService.getEmailFromRequest(request);
 
         Pageable pageable = PageRequest.of(
                 page,
@@ -75,7 +75,7 @@ public class UserReviewController {
             @Valid @RequestBody ReviewInsertDTO insertDTO,
             HttpServletRequest request) {
 
-        String email = jwtUtil.getEmailFromRequest(request);
+        String email = jwtService.getEmailFromRequest(request);
         insertDTO.setAuthorEmail(email);
 
         Result<Void> validationResult = reviewService.validate(insertDTO);
@@ -101,7 +101,7 @@ public class UserReviewController {
             @Valid @RequestBody ReviewUpdateDTO updateDTO,
             HttpServletRequest request) {
 
-        String email = jwtUtil.getEmailFromRequest(request);
+        String email = jwtService.getEmailFromRequest(request);
 
         Result<Void> validationResult = reviewService.validate(updateDTO, email);
         if (!validationResult.isSuccess()) {
@@ -125,7 +125,7 @@ public class UserReviewController {
             @Parameter(description = "ID of the review to be deleted", example = "1")
             @PathVariable Long id,
             HttpServletRequest request) {
-        String email = jwtUtil.getEmailFromRequest(request);
+        String email = jwtService.getEmailFromRequest(request);
 
         reviewService.delete(id, email);
         touristPlaceService.updatePlaceRating(id);

@@ -1,11 +1,12 @@
 package at.backend.tourist.places.Config;
 
+import at.backend.tourist.places.DTOs.LoginResponseDTO;
 import at.backend.tourist.places.Models.User;
 import at.backend.tourist.places.Repository.UserRepository;
 import at.backend.tourist.places.Service.UserService;
 import at.backend.tourist.places.Utils.Enum.Role;
-import at.backend.tourist.places.Utils.JWT.JwtAuthenticationFilter;
-import at.backend.tourist.places.Utils.JWT.JwtUtil;
+import at.backend.tourist.places.JWT.JwtAuthenticationFilter;
+import at.backend.tourist.places.JWT.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +42,7 @@ public class SecurityConfig {
     private JwtAuthenticationFilter jwtAuthFilter;
 
     @Autowired
-    private JwtUtil jwtUtil;
+    private JwtService jwtService;
 
     @Autowired
     private UserRepository userRepository;
@@ -127,9 +128,9 @@ public class SecurityConfig {
 
         System.out.println("Roles: " + oauth2User.getAuthorities());
 
-        String token = jwtUtil.generateToken(email, role);
+        LoginResponseDTO responseDTO = jwtService.generateLoginTokens(email, role);
 
         response.setContentType("application/json");
-        response.getWriter().write("{\"token\":\"" + token + "\"}");
+        response.getWriter().write("{\"tokens\":\"" + responseDTO + "\"}");
     }
 }
