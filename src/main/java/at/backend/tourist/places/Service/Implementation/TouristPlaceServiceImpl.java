@@ -3,6 +3,7 @@ package at.backend.tourist.places.Service.Implementation;
 import at.backend.tourist.places.AutoMappers.TouristPlaceMapper;
 import at.backend.tourist.places.DTOs.TouristPlaceDTO;
 import at.backend.tourist.places.DTOs.TouristPlaceInsertDTO;
+import at.backend.tourist.places.DTOs.TouristPlaceSearchDTO;
 import at.backend.tourist.places.Models.Country;
 import at.backend.tourist.places.Models.PlaceCategory;
 import at.backend.tourist.places.Models.Review;
@@ -13,9 +14,13 @@ import at.backend.tourist.places.Repository.TouristPlaceRepository;
 import at.backend.tourist.places.Service.TouristPlaceService;
 import at.backend.tourist.places.Utils.PlaceRelationships;
 import at.backend.tourist.places.Utils.Result;
+import at.backend.tourist.places.Utils.TouristPlaceSpecification;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +36,7 @@ public class TouristPlaceServiceImpl implements TouristPlaceService {
     private final CountryRepository countryRepository;
     private final PlaceCategoryRepository placeCategoryRepository;
     private final TouristPlaceMapper touristPlaceMapper;
+    private final TouristPlaceSpecification specification;
 
     @Override
     public TouristPlaceDTO getById(Long id) {
@@ -48,6 +54,23 @@ public class TouristPlaceServiceImpl implements TouristPlaceService {
                 .map(touristPlaceMapper::entityToDTO)
                 .toList();
     }
+
+    public Page<TouristPlaceDTO> searchTouristPlaces(TouristPlaceSearchDTO searchDTO, Pageable pageable) {
+        Specification<TouristPlace> spec = TouristPlaceSpecification.combineSpecifications(
+                TouristPlaceSpecification.hasName(searchDTO.getName()),
+                TouristPlaceSpecification.hasDescription(searchDTO.getDescription()),
+                TouristPlaceSpecification.hasRating(searchDTO.getRating()),
+                TouristPlaceSpecification.hasCountry(searchDTO.getCountryName()),
+                TouristPlaceSpecification.hasCategory(searchDTO.getCategoryName()),
+                TouristPlaceSpecification.hasPriceRange(searchDTO.getPriceRange()),
+                TouristPlaceSpecification.hasOpeningHours(searchDTO.getOpeningHours())
+        );
+
+        Page<TouristPlace> touristPlacePage = touristPlaceRepository.findAll(spec, pageable);
+
+        return touristPlacePage.map(touristPlaceMapper::entityToDTO);
+    }
+
 
     @Override
     public List<TouristPlaceDTO> getByCountry(Long countryId) {

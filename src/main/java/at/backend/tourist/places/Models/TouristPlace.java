@@ -36,8 +36,6 @@ public class TouristPlace {
     @Column(name = "price_range")
     private String priceRange;
 
-
-
     @ManyToOne
     @JoinColumn(name = "country_id")
     private Country country;

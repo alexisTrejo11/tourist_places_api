@@ -2,6 +2,7 @@ package at.backend.tourist.places.Controller;
 
 import at.backend.tourist.places.DTOs.TouristPlaceDTO;
 import at.backend.tourist.places.DTOs.TouristPlaceInsertDTO;
+import at.backend.tourist.places.DTOs.TouristPlaceSearchDTO;
 import at.backend.tourist.places.Service.TouristPlaceService;
 import at.backend.tourist.places.Utils.PlaceRelationships;
 import at.backend.tourist.places.Utils.Result;
@@ -11,8 +12,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,18 +27,33 @@ import java.util.List;
 
 @RestController
 @RequestMapping("v1/api/tourist_places")
-@Schema(description = "Controller for managing tourist places")
+@Tag(name = "Tourist Places", description = "API for managing tourist places")
 public class TouristPlaceController {
 
     @Autowired
-    private TouristPlaceService touristPlaceService;
+    private TouristPlaceService placeService;
 
-    @Operation(summary = "Get all tourist places", description = "Retrieve a list of all tourist places available in the system.")
-    @ApiResponse(responseCode = "200", description = "List of tourist places retrieved successfully",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = TouristPlaceDTO.class)))
-    @GetMapping
-    public List<TouristPlaceDTO> getAllCountries() {
-        return touristPlaceService.getAll();
+    @Operation(summary = "Search tourist places", description = "Search for tourist places based on various criteria such as name, description, rating, country, category, etc.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Tourist places found",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Page.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input parameters")
+    })
+    @GetMapping("/search")
+    public ResponseEntity<Page<TouristPlaceDTO>> searchTouristPlaces(
+            @ModelAttribute TouristPlaceSearchDTO searchDto) {
+
+        Sort sort = Sort.by(
+                searchDto.getSortDirection().equalsIgnoreCase("desc") ?
+                        Sort.Direction.DESC : Sort.Direction.ASC,
+                searchDto.getSortBy()
+        );
+
+        Pageable pageable = PageRequest.of(searchDto.getPage(), searchDto.getSize(), sort);
+
+        Page<TouristPlaceDTO> results = placeService.searchTouristPlaces(searchDto, pageable);
+
+        return ResponseEntity.ok(results);
     }
 
     @Operation(summary = "Get a tourist place by ID", description = "Retrieve a tourist place by its unique identifier.")
@@ -44,7 +65,7 @@ public class TouristPlaceController {
     @GetMapping("/{id}")
     public ResponseEntity<TouristPlaceDTO> getTouristPlaceById(
             @PathVariable @Schema(description = "Unique ID of the tourist place", example = "1") Long id) {
-        TouristPlaceDTO place = touristPlaceService.getById(id);
+        TouristPlaceDTO place = placeService.getById(id);
         if (place == null) {
             return ResponseEntity.notFound().build();
         }
@@ -60,7 +81,7 @@ public class TouristPlaceController {
     @GetMapping("/country/{countryId}")
     public ResponseEntity<List<TouristPlaceDTO>> getByCountryId(
             @PathVariable @Schema(description = "Unique ID of the country", example = "10") Long countryId) {
-        List<TouristPlaceDTO> places = touristPlaceService.getByCountry(countryId);
+        List<TouristPlaceDTO> places = placeService.getByCountry(countryId);
         if (places == null) {
             return ResponseEntity.notFound().build();
         }
@@ -76,7 +97,7 @@ public class TouristPlaceController {
     @GetMapping("/category/{categoryId}")
     public ResponseEntity<List<TouristPlaceDTO>> getByCategoryId(
             @PathVariable @Schema(description = "Unique ID of the category", example = "3") Long categoryId) {
-        List<TouristPlaceDTO> places = touristPlaceService.getByCategory(categoryId);
+        List<TouristPlaceDTO> places = placeService.getByCategory(categoryId);
         if (places == null) {
             return ResponseEntity.notFound().build();
         }
@@ -95,13 +116,13 @@ public class TouristPlaceController {
                     required = true, content = @Content(schema = @Schema(implementation = TouristPlaceInsertDTO.class)))
             TouristPlaceInsertDTO insertDTO) {
 
-        Result<PlaceRelationships> validationResult = touristPlaceService.validate(insertDTO);
+        Result<PlaceRelationships> validationResult = placeService.validate(insertDTO);
         if (!validationResult.isSuccess()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(validationResult.getErrorMessage());
         }
 
         insertDTO.setPlaceRelationships(validationResult.getData());
-        TouristPlaceDTO createdTouristPlace = touristPlaceService.create(insertDTO);
+        TouristPlaceDTO createdTouristPlace = placeService.create(insertDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdTouristPlace);
     }
 
@@ -113,11 +134,11 @@ public class TouristPlaceController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTouristPlace(
             @PathVariable @Schema(description = "Unique ID of the tourist place to delete", example = "1") Long id) {
-        if (touristPlaceService.getById(id) == null) {
+        if (placeService.getById(id) == null) {
             return ResponseEntity.notFound().build();
         }
 
-        touristPlaceService.delete(id);
+        placeService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }
