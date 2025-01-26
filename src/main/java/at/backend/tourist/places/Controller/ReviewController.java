@@ -97,7 +97,10 @@ public class ReviewController {
         if (reviewService.getById(id) == null) {
             return ResponseEntity.notFound().build();
         }
+
         reviewService.delete(id);
+        touristPlaceService.updatePlaceRating(id);
+
         return ResponseEntity.noContent().build();
     }
 }

@@ -123,9 +123,13 @@ public class UserReviewController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMyReview(
             @Parameter(description = "ID of the review to be deleted", example = "1")
-            @PathVariable Long id) {
+            @PathVariable Long id,
+            HttpServletRequest request) {
+        String email = jwtUtil.getEmailFromRequest(request);
 
-        reviewService.delete(id);
+        reviewService.delete(id, email);
+        touristPlaceService.updatePlaceRating(id);
+
         return ResponseEntity.noContent().build();
     }
 }
