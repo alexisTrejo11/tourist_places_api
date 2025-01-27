@@ -8,10 +8,13 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface TouristPlaceRepository extends JpaRepository<TouristPlace, Long>, JpaSpecificationExecutor<TouristPlace>  {
     List<TouristPlace> findByCountryId(Long countryId);
+    Set<TouristPlace> findByIdIn(Set<Long> idList);
+
 
     @Query("SELECT t FROM TouristPlace t LEFT JOIN FETCH t.reviews WHERE t.id = :id")
     Optional<TouristPlace> findByIdWithReviews(Long id);

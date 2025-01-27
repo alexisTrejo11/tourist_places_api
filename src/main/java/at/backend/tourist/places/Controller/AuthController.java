@@ -68,7 +68,6 @@ public class AuthController {
         if (!authService.isTokenValid(token)) {
             return ResponseEntity.badRequest().body("Invalid or Expired Token");
         }
-        // CustomToken Needs Email
         String email = authService.getEmailFromToken(token);
         userService.activateUser(email);
 

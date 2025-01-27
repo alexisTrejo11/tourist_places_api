@@ -45,4 +45,7 @@ public class User {
         this.joinedAt = LocalDateTime.now();
         this.lastLogin = LocalDateTime.now();
     }
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<PlaceList> placeLists;
 }

@@ -26,6 +26,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -70,6 +72,28 @@ public class TouristPlaceServiceImpl implements TouristPlaceService {
 
         return touristPlacePage.map(touristPlaceMapper::entityToDTO);
     }
+
+    @Override
+    public List<TouristPlaceDTO> getByIdList(Set<Long> idsList) {
+        Set<TouristPlace> touristPlaces = touristPlaceRepository.findByIdIn(idsList);
+
+        Set<Long> foundIds = touristPlaces.stream()
+                .map(TouristPlace::getId)
+                .collect(Collectors.toSet());
+
+        List<Long> missingIds = idsList.stream()
+                .filter(id -> !foundIds.contains(id))
+                .toList();
+
+        if (!missingIds.isEmpty()) {
+            throw new EntityNotFoundException("Not found IDs for places: " + missingIds);
+        }
+
+        return touristPlaces.stream()
+                .map(touristPlaceMapper::entityToDTO)
+                .toList();
+    }
+
 
 
     @Override

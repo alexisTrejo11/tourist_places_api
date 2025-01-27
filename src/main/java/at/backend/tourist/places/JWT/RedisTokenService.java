@@ -1,65 +1,56 @@
 package at.backend.tourist.places.JWT;
 
-import at.backend.tourist.places.Utils.RedisTokenDTO;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Service
 public class RedisTokenService {
 
+    private static final String BLACKLISTED_PREFIX = "blacklisted_token:";
+    private static final String VALIDATION_PREFIX = "validation_token:";
+
     private final StringRedisTemplate redisTemplate;
-    private final ObjectMapper objectMapper;
 
-    public RedisTokenService(StringRedisTemplate redisTemplate, ObjectMapper objectMapper) {
+    public RedisTokenService(StringRedisTemplate redisTemplate) {
         this.redisTemplate = redisTemplate;
-        this.objectMapper = objectMapper;
     }
 
-    // Guardar un token (válido o blacklisted) con email y status como JSON
-    public void saveToken(String token, String email, String status, long ttlSeconds) {
-        try {
-            RedisTokenDTO redisTokenDTO = new RedisTokenDTO(token, email, status);
-            String jsonData = objectMapper.writeValueAsString(redisTokenDTO);
-            String keyPrefix = status.equals("blacklisted") ? "blacklisted_token:" : "valid_token:";
-            redisTemplate.opsForValue().set(keyPrefix + token, jsonData, ttlSeconds, TimeUnit.SECONDS);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error serializing token data", e);
+    public void saveToken(String token, String email, String type, long ttlSeconds) {
+        if (token == null || token.isEmpty() || email == null || email.isEmpty()) {
+            throw new IllegalArgumentException("Token and email must not be null or empty");
         }
+
+        String keyPrefix = type.equals("blacklisted") ? BLACKLISTED_PREFIX : VALIDATION_PREFIX;
+        redisTemplate.opsForValue().set(keyPrefix + token, email, ttlSeconds, TimeUnit.SECONDS);
     }
 
-    public RedisTokenDTO getTokenData(String token) {
-        try {
-            String jsonData = redisTemplate.opsForValue().get("valid_token:" + token);
-            if (jsonData == null) {
-                jsonData = redisTemplate.opsForValue().get("blacklisted_token:" + token);
+    public String getTokenData(String token) {
+        for (String prefix : List.of(VALIDATION_PREFIX, BLACKLISTED_PREFIX)) {
+            String data = redisTemplate.opsForValue().get(prefix + token);
+            if (data != null) {
+                return data;
             }
-            if (jsonData != null) {
-                return objectMapper.readValue(jsonData, RedisTokenDTO.class);
-            }
-            return null;
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error deserializing token data", e);
         }
+        return null;
     }
 
     public void deleteToken(String token) {
-        redisTemplate.delete("valid_token:" + token);
-        redisTemplate.delete("blacklisted_token:" + token);
+        redisTemplate.delete(VALIDATION_PREFIX + token);
+        redisTemplate.delete(BLACKLISTED_PREFIX + token);
     }
 
     public boolean isTokenBlacklisted(String token) {
-        return redisTemplate.hasKey("blacklisted_token:" + token);
+        return redisTemplate.hasKey(BLACKLISTED_PREFIX + token);
     }
 
     public void blacklistToken(String token) {
-        saveToken(token, "", "blacklisted", ttlSeconds);
+        redisTemplate.opsForValue().set(BLACKLISTED_PREFIX + token, "", 10800, TimeUnit.SECONDS);
     }
 
     public boolean validateToken(String token) {
-        return redisTemplate.hasKey("valid_token:" + token);
+        return redisTemplate.hasKey(VALIDATION_PREFIX + token);
     }
 }

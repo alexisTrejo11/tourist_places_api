@@ -102,7 +102,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public String getEmailFromToken(String token) {
         if (token.length() == 6) {
-
+            return redisTokenService.getTokenData(token);
         }
 
         return jwtService.getEmailFromToken(token);

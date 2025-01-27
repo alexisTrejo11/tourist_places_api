@@ -99,6 +99,17 @@ public class JwtService {
         return getEmailFromToken(token);
     }
 
+    public Long getIdFromRequest(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new IllegalArgumentException("Invalid Authorization header.");
+        }
+
+        String token = authHeader.substring(7).trim();
+        return 1L;
+    }
+
     public LoginResponseDTO generateLoginTokens(String email, String role) {
         String accessToken = tokenFactory.getTokenGenerator("access").generateToken(email, role);
         String refreshToken = tokenFactory.getTokenGenerator("refresh").generateToken(email, "");
