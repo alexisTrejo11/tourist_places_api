@@ -4,6 +4,7 @@ import at.backend.tourist.places.modules.Activity.DTOs.ActivityDTO;
 import at.backend.tourist.places.modules.Activity.DTOs.ActivityInsertDTO;
 import at.backend.tourist.places.modules.Places.TouristPlace;
 import at.backend.tourist.places.modules.Activity.Service.ActivityService;
+import at.backend.tourist.places.core.Utils.ResponseWrapper;
 import at.backend.tourist.places.core.Utils.Result;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -13,7 +14,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,8 +30,9 @@ public class ActivityController {
     @Operation(summary = "Get all activities", description = "Retrieve a list of all activities available.")
     @ApiResponse(responseCode = "200", description = "List of activities retrieved successfully")
     @GetMapping
-    public List<ActivityDTO> getAllActivities() {
-        return activityService.getAll();
+    public ResponseEntity<ResponseWrapper<List<ActivityDTO>>> getAllActivities() {
+        List<ActivityDTO> activities = activityService.getAll();
+        return ResponseEntity.ok(ResponseWrapper.found(activities, "Activities"));
     }
 
     @Operation(summary = "Get an activity by ID", description = "Retrieve the details of a specific activity using its ID.")
@@ -41,13 +42,13 @@ public class ActivityController {
             @ApiResponse(responseCode = "404", description = "Activity not found")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<ActivityDTO> getActivityById(
+    public ResponseEntity<ResponseWrapper<ActivityDTO>> getActivityById(
             @Parameter(description = "ID of the activity to retrieve", example = "1") @PathVariable Long id) {
         ActivityDTO activity = activityService.getById(id);
         if (activity == null) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(404).body(ResponseWrapper.notFound("Activity"));
         }
-        return ResponseEntity.ok(activity);
+        return ResponseEntity.ok(ResponseWrapper.found(activity, "Activity"));
     }
 
     @Operation(summary = "Get activities by tourist place ID", description = "Retrieve a list of activities associated with a specific tourist place.")
@@ -56,13 +57,13 @@ public class ActivityController {
             @ApiResponse(responseCode = "404", description = "No activities found for the specified tourist place")
     })
     @GetMapping("/tourist_place/{place_id}")
-    public ResponseEntity<List<ActivityDTO>> getByTouristPlaceId(
+    public ResponseEntity<ResponseWrapper<List<ActivityDTO>>> getByTouristPlaceId(
             @Parameter(description = "ID of the tourist place", example = "101") @PathVariable Long place_id) {
         List<ActivityDTO> activities = activityService.getByTouristPlace(place_id);
         if (activities == null || activities.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(404).body(ResponseWrapper.notFound("Activities"));
         }
-        return ResponseEntity.ok(activities);
+        return ResponseEntity.ok(ResponseWrapper.found(activities, "Activities"));
     }
 
     @Operation(summary = "Create a new activity", description = "Add a new activity to the system.")
@@ -72,17 +73,17 @@ public class ActivityController {
             @ApiResponse(responseCode = "400", description = "Invalid input data")
     })
     @PostMapping
-    public ResponseEntity<?> createActivity(
+    public ResponseEntity<ResponseWrapper<ActivityDTO>> createActivity(
             @Parameter(description = "Details of the activity to create") @RequestBody ActivityInsertDTO insertDTO) {
         Result<TouristPlace> validationResult = activityService.validate(insertDTO);
         if (!validationResult.isSuccess()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(validationResult.getErrorMessage());
+            return ResponseEntity.status(400).body(ResponseWrapper.badRequest(validationResult.getErrorMessage()));
         }
 
         insertDTO.setTouristPlace(validationResult.getData());
         ActivityDTO createdActivity = activityService.create(insertDTO);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdActivity);
+        return ResponseEntity.status(201).body(ResponseWrapper.created(createdActivity, "Activity"));
     }
 
     @Operation(summary = "Delete an activity by ID", description = "Delete an activity from the system using its ID.")
@@ -91,13 +92,13 @@ public class ActivityController {
             @ApiResponse(responseCode = "404", description = "Activity not found")
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteActivity(
+    public ResponseEntity<ResponseWrapper<Void>> deleteActivity(
             @Parameter(description = "ID of the activity to delete", example = "1") @PathVariable Long id) {
         if (activityService.getById(id) == null) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(404).body(ResponseWrapper.notFound("Activity"));
         }
 
         activityService.delete(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.status(204).body(ResponseWrapper.deleted("Activity"));
     }
 }

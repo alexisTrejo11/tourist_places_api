@@ -1,5 +1,6 @@
 package at.backend.tourist.places.modules.Places.Controller;
 
+import at.backend.tourist.places.core.Utils.ResponseWrapper;
 import at.backend.tourist.places.modules.Places.DTOs.PlaceListDTO;
 import at.backend.tourist.places.modules.Places.Service.PlaceListService;
 import lombok.RequiredArgsConstructor;
@@ -16,30 +17,36 @@ public class PlaceListController {
     private final PlaceListService placeListService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<PlaceListDTO> getById(@PathVariable Long id) {
+    public ResponseWrapper<PlaceListDTO> getById(@PathVariable Long id) {
         PlaceListDTO placeList = placeListService.getById(id);
         if (placeList == null) {
-            return ResponseEntity.notFound().build();
+            return ResponseWrapper.notFound("Place List");
         }
-        return ResponseEntity.ok(placeList);
+        return ResponseWrapper.found(placeList, "Place List");
     }
 
     @GetMapping
-    public ResponseEntity<List<PlaceListDTO>> getAll() {
+    public ResponseWrapper<List<PlaceListDTO>> getAll() {
         List<PlaceListDTO> placeLists = placeListService.getAll();
-        return ResponseEntity.ok(placeLists);
+        return ResponseWrapper.found(placeLists, "Place Lists");
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<PlaceListDTO>> getByUserId(@PathVariable Long userId) {
+    public ResponseWrapper<List<PlaceListDTO>> getByUserId(@PathVariable Long userId) {
         List<PlaceListDTO> placeLists = placeListService.getByUserId(userId);
-        return ResponseEntity.ok(placeLists);
+        if (placeLists.isEmpty()) {
+            return ResponseWrapper.notFound("Place Lists for User ID: " + userId);
+        }
+        return ResponseWrapper.found(placeLists, "Place Lists");
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseWrapper<Void> delete(@PathVariable Long id) {
+        PlaceListDTO placeList = placeListService.getById(id);
+        if (placeList == null) {
+            return ResponseWrapper.notFound("Place List");
+        }
         placeListService.delete(id);
-        return ResponseEntity.noContent().build();
+        return ResponseWrapper.deleted("Place List");
     }
 }
-

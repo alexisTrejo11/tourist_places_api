@@ -1,5 +1,6 @@
 package at.backend.tourist.places.modules.Review.Controller;
 
+import at.backend.tourist.places.core.Utils.ResponseWrapper;
 import at.backend.tourist.places.modules.Review.DTOs.ReviewDTO;
 import at.backend.tourist.places.modules.Review.DTOs.ReviewInsertDTO;
 import at.backend.tourist.places.modules.Review.Service.ReviewService;
@@ -32,8 +33,8 @@ public class ReviewController {
     @Operation(summary = "Get all reviews", description = "Fetches all reviews in the system")
     @ApiResponse(responseCode = "200", description = "List of all reviews retrieved successfully")
     @GetMapping
-    public List<ReviewDTO> getAllReviews() {
-        return reviewService.getAll();
+    public ResponseWrapper<List<ReviewDTO>> getAllReviews() {
+        return ResponseWrapper.found(reviewService.getAll(), "Reviews");
     }
 
     @Operation(summary = "Get reviews by tourist place ID",
@@ -59,12 +60,12 @@ public class ReviewController {
     })
     @Parameter(name = "id", description = "ID of the review to retrieve", example = "1", required = true)
     @GetMapping("/{id}")
-    public ResponseEntity<ReviewDTO> getReviewById(@PathVariable Long id) {
+    public ResponseEntity<ResponseWrapper<ReviewDTO>> getReviewById(@PathVariable Long id) {
         ReviewDTO review = reviewService.getById(id);
         if (review == null) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseWrapper.notFound("Review"));
         }
-        return ResponseEntity.ok(review);
+        return ResponseEntity.ok(ResponseWrapper.found(review, "Review"));
     }
 
     @Operation(summary = "Create a new review", description = "Creates a new review with the provided details")
@@ -74,14 +75,14 @@ public class ReviewController {
             @ApiResponse(responseCode = "401", description = "Unauthorized, user not authenticated")
     })
     @PostMapping
-    public ResponseEntity<ReviewDTO> createReview(@Valid @RequestBody ReviewInsertDTO insertDTO) {
+    public ResponseEntity<ResponseWrapper<ReviewDTO>> createReview(@Valid @RequestBody ReviewInsertDTO insertDTO) {
         Result<Void> validationResult = reviewService.validate(insertDTO);
 
         ReviewDTO createdReview = reviewService.create(insertDTO);
 
         touristPlaceService.updatePlaceRating(createdReview.getPlaceId());
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdReview);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseWrapper.created(createdReview, "Review"));
     }
 
     @Operation(summary = "Delete a review", description = "Deletes a review by its ID")
@@ -92,7 +93,7 @@ public class ReviewController {
     })
     @Parameter(name = "id", description = "ID of the review to delete", example = "1", required = true)
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReview(@PathVariable Long id) {
+    public ResponseEntity<ResponseWrapper<Void>> deleteReview(@PathVariable Long id) {
         if (reviewService.getById(id) == null) {
             return ResponseEntity.notFound().build();
         }
@@ -100,6 +101,6 @@ public class ReviewController {
         reviewService.delete(id);
         touristPlaceService.updatePlaceRating(id);
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(ResponseWrapper.deleted("Review"));
     }
 }

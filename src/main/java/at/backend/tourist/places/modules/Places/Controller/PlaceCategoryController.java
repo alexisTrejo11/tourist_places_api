@@ -1,5 +1,6 @@
 package at.backend.tourist.places.modules.Places.Controller;
 
+import at.backend.tourist.places.core.Utils.ResponseWrapper;
 import at.backend.tourist.places.modules.Places.DTOs.PlaceCategoryDTO;
 import at.backend.tourist.places.modules.Places.DTOs.PlaceCategoryInsertDTO;
 import at.backend.tourist.places.modules.Places.Service.PlaceCategoryService;
@@ -9,8 +10,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,8 +30,8 @@ public class PlaceCategoryController {
             }
     )
     @GetMapping
-    public List<PlaceCategoryDTO> getAllCountries() {
-        return placeCategoryService.getAll();
+    public ResponseWrapper<List<PlaceCategoryDTO>> getAllPlaceCategories() {
+        return ResponseWrapper.found(placeCategoryService.getAll(), "Place Categories");
     }
 
     @Operation(
@@ -45,13 +44,12 @@ public class PlaceCategoryController {
             }
     )
     @GetMapping("/{id}")
-    public ResponseEntity<PlaceCategoryDTO> getPlaceCategoryById(@PathVariable Long id) {
-        PlaceCategoryDTO country = placeCategoryService.getById(id);
-        if (country == null) {
-            return ResponseEntity.notFound().build();
+    public ResponseWrapper<PlaceCategoryDTO> getPlaceCategoryById(@PathVariable Long id) {
+        PlaceCategoryDTO placeCategory = placeCategoryService.getById(id);
+        if (placeCategory == null) {
+            return ResponseWrapper.notFound("Place Category");
         }
-
-        return ResponseEntity.ok(country);
+        return ResponseWrapper.found(placeCategory, "Place Category");
     }
 
     @Operation(
@@ -67,9 +65,9 @@ public class PlaceCategoryController {
             }
     )
     @PostMapping
-    public ResponseEntity<PlaceCategoryDTO> createPlaceCategory(@RequestBody PlaceCategoryInsertDTO insertDTO) {
+    public ResponseWrapper<PlaceCategoryDTO> createPlaceCategory(@RequestBody PlaceCategoryInsertDTO insertDTO) {
         PlaceCategoryDTO createdPlaceCategory = placeCategoryService.create(insertDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdPlaceCategory);
+        return ResponseWrapper.created(createdPlaceCategory, "Place Category");
     }
 
     @Operation(
@@ -84,12 +82,11 @@ public class PlaceCategoryController {
             }
     )
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePlaceCategory(@PathVariable Long id) {
+    public ResponseWrapper<Void> deletePlaceCategory(@PathVariable Long id) {
         if (placeCategoryService.getById(id) == null) {
-            return ResponseEntity.notFound().build();
+            return ResponseWrapper.notFound("Place Category");
         }
-
         placeCategoryService.delete(id);
-        return ResponseEntity.noContent().build();
+        return ResponseWrapper.deleted("Place Category");
     }
 }
