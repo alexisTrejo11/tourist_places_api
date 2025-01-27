@@ -1,5 +1,6 @@
 package at.backend.tourist.places.modules.User.Controller;
 
+import at.backend.tourist.places.core.Utils.ResponseWrapper;
 import at.backend.tourist.places.modules.Review.DTOs.ReviewDTO;
 import at.backend.tourist.places.modules.Review.DTOs.ReviewInsertDTO;
 import at.backend.tourist.places.modules.Review.DTOs.ReviewUpdateDTO;
@@ -42,7 +43,7 @@ public class UserReviewController {
             @ApiResponse(responseCode = "401", description = "Unauthorized request")
     })
     @GetMapping
-    public Page<ReviewDTO> getMyReviews(
+    public ResponseWrapper<Page<ReviewDTO>> getMyReviews(
             HttpServletRequest request,
             @Parameter(description = "Page number (zero-based)", example = "0")
             @RequestParam(defaultValue = "0") int page,
@@ -61,7 +62,7 @@ public class UserReviewController {
                 Sort.by(Sort.Direction.fromString(sortDirection), sortBy)
         );
 
-        return reviewService.getReviewByEmail(email, pageable);
+        return ResponseWrapper.found(reviewService.getReviewByEmail(email, pageable), "Reviews");
     }
 
     @Operation(summary = "Create a new review", description = "Allows a user to create a new review for a tourist place.")
@@ -71,22 +72,22 @@ public class UserReviewController {
             @ApiResponse(responseCode = "401", description = "Unauthorized request")
     })
     @PostMapping
-    public ResponseEntity<?> newReview(
-            @Valid @RequestBody ReviewInsertDTO insertDTO,
-            HttpServletRequest request) {
-
+    public ResponseEntity<ResponseWrapper<ReviewDTO>> newReview(@Valid @RequestBody ReviewInsertDTO insertDTO,
+                                                                HttpServletRequest request) {
         String email = jwtService.getEmailFromRequest(request);
         insertDTO.setAuthorEmail(email);
 
         Result<Void> validationResult = reviewService.validate(insertDTO);
         if (!validationResult.isSuccess()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(validationResult.getErrorMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ResponseWrapper.badRequest(validationResult.getErrorMessage()));
         }
 
         ReviewDTO createdReview = reviewService.create(insertDTO);
+
         touristPlaceService.updatePlaceRating(createdReview.getPlaceId());
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdReview);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseWrapper.created(createdReview, "Review"));
     }
 
     @Operation(summary = "Update an existing review", description = "Allows a user to update one of their reviews.")
@@ -97,21 +98,21 @@ public class UserReviewController {
             @ApiResponse(responseCode = "404", description = "Review not found")
     })
     @PutMapping
-    public ResponseEntity<?> updateMyReview(
-            @Valid @RequestBody ReviewUpdateDTO updateDTO,
-            HttpServletRequest request) {
-
+    public ResponseEntity<ResponseWrapper<ReviewDTO>> updateMyReview(@Valid @RequestBody ReviewUpdateDTO updateDTO,
+                                                                     HttpServletRequest request) {
         String email = jwtService.getEmailFromRequest(request);
 
         Result<Void> validationResult = reviewService.validate(updateDTO, email);
         if (!validationResult.isSuccess()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(validationResult.getErrorMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ResponseWrapper.badRequest(validationResult.getErrorMessage()));
         }
 
         ReviewDTO createdReview = reviewService.update(updateDTO, email);
+
         touristPlaceService.updatePlaceRating(createdReview.getPlaceId());
 
-        return ResponseEntity.status(HttpStatus.OK).body(createdReview);
+        return ResponseEntity.ok(ResponseWrapper.ok(createdReview, "Review" , "update"));
     }
 
     @Operation(summary = "Delete a review", description = "Deletes a user review by its ID.")
@@ -121,15 +122,16 @@ public class UserReviewController {
             @ApiResponse(responseCode = "401", description = "Unauthorized request")
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteMyReview(
+    public ResponseEntity<ResponseWrapper<Void>> deleteMyReview(
             @Parameter(description = "ID of the review to be deleted", example = "1")
             @PathVariable Long id,
             HttpServletRequest request) {
         String email = jwtService.getEmailFromRequest(request);
 
         reviewService.delete(id, email);
+
         touristPlaceService.updatePlaceRating(id);
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(ResponseWrapper.ok("Review", "Delete"));
     }
 }

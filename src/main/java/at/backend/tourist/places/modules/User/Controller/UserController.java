@@ -1,5 +1,7 @@
 package at.backend.tourist.places.modules.User.Controller;
 
+import at.backend.tourist.places.core.SwaggerHelper.ApiResponseExamples;
+import at.backend.tourist.places.core.Utils.ResponseWrapper;
 import at.backend.tourist.places.modules.User.DTOs.UserDTO;
 import at.backend.tourist.places.modules.User.DTOs.UserInsertDTO;
 import at.backend.tourist.places.modules.User.Service.UserService;
@@ -7,6 +9,9 @@ import at.backend.tourist.places.core.Utils.Enum.Role;
 import at.backend.tourist.places.modules.Auth.JWT.JwtService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -29,18 +34,17 @@ import java.util.List;
 @Tag(name = "User Management", description = "Operations related to user management")
 @SecurityRequirement(name = "bearerAuth")
 public class UserController {
-
     private final UserService userService;
     private final JwtService jwtService;
 
     @Operation(summary = "Get current logged-in user", description = "Fetches the details of the currently logged-in user based on the JWT token")
     @GetMapping("/me")
-    private ResponseEntity<UserDTO> me(HttpServletRequest request) {
+    private ResponseEntity<ResponseWrapper<UserDTO>> me(HttpServletRequest request) {
         String email = jwtService.getEmailFromRequest(request);
 
         UserDTO user = userService.getByEmail(email);
 
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(ResponseWrapper.found(user,"User"));
     }
 
     @Operation(summary = "Get all users", description = "Fetches a list of all registered users")
@@ -50,29 +54,49 @@ public class UserController {
             @ApiResponse(responseCode = "403", description = "Forbidden, user lacks necessary permissions (admin required)")
     })
     @GetMapping("/all")
-    private ResponseEntity<List<UserDTO>> getAllUsers() {
+    private ResponseEntity<ResponseWrapper<List<UserDTO>>> getAllUsers() {
         List<UserDTO> users = userService.getAll();
 
-        return ResponseEntity.ok(users);
+        return ResponseEntity.ok(ResponseWrapper.found(users,"Users"));
     }
 
-    @Operation(summary = "Get user by ID", description = "Fetches a user by their ID")
+    @Operation(summary = "Get user by ID")
     @Parameter(name = "userId", description = "ID of the user to fetch", required = true)
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "User found"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized, user not authenticated"),
-            @ApiResponse(responseCode = "403", description = "Forbidden, user lacks necessary permissions (admin required)"),
-            @ApiResponse(responseCode = "404", description = "User not found")
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "User found",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ResponseWrapper.class),
+                            examples = @ExampleObject(value = ApiResponseExamples.USER_FOUND)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "User not found",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseWrapper.class),
+                            examples = @ExampleObject(value = ApiResponseExamples.USER_NOT_FOUND)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ResponseWrapper.class),
+                            examples = @ExampleObject(value = ApiResponseExamples.UNAUTHORIZED_ACCESS)
+                    )
+            )
     })
     @GetMapping("/{userId}")
-    private ResponseEntity<UserDTO> getUserById(@Valid @PathVariable Long userId) {
+    private ResponseEntity<ResponseWrapper<UserDTO>> getUserById(@Valid @PathVariable Long userId) {
         UserDTO userDTO = userService.getById(userId);
         if (userDTO == null) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseWrapper.notFound("User"));
         }
 
-        return ResponseEntity.ok(userDTO);
+        return ResponseEntity.ok(ResponseWrapper.found(userDTO, "User"));
     }
+
 
     @Operation(summary = "Get users by role", description = "Fetches a list of users based on their role with pagination")
     @Parameter(name = "role", description = "Role of the users to fetch", required = true)
@@ -84,14 +108,14 @@ public class UserController {
             @ApiResponse(responseCode = "403", description = "Forbidden, user lacks necessary permissions (admin required)")
     })
     @GetMapping("by-role/{role}")
-    private ResponseEntity<List<UserDTO>> getUserByRole(@Valid @PathVariable Role role,
+    private ResponseEntity<ResponseWrapper<Page<UserDTO>>> getUserByRole(@Valid @PathVariable Role role,
                                                         @RequestParam(defaultValue = "0") int page,
                                                         @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<UserDTO> userDTOPage = userService.getByRole(role, pageable);
+        Page<UserDTO> userPage = userService.getByRole(role, pageable);
 
-        return ResponseEntity.ok(userDTOPage.get().toList());
+        return ResponseEntity.ok(ResponseWrapper.found(userPage, "User"));
     }
 
     @Operation(summary = "Create a new user", description = "Creates a new user with the provided details")
@@ -103,9 +127,10 @@ public class UserController {
 
     })
     @PostMapping
-    private ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserInsertDTO insertDTO) {
+    private ResponseEntity<ResponseWrapper<UserDTO>> createUser(@Valid @RequestBody UserInsertDTO insertDTO) {
         UserDTO userDTO = userService.create(insertDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(userDTO);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseWrapper.created(userDTO, "User"));
     }
 
     @Operation(summary = "Update a user's role", description = "Updates the role of a user by their ID")
@@ -119,12 +144,11 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "User not found")
     })
     @PutMapping("{userId}/update-role/{role}")
-    private ResponseEntity<UserDTO> updateUserRole(@Valid @PathVariable Long userId,
+    private ResponseEntity<ResponseWrapper<Void>> updateUserRole(@Valid @PathVariable Long userId,
                                                    @PathVariable Role role) {
 
         userService.updateRole(userId, role);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(ResponseWrapper.ok("User", "role update"));
     }
-
 }
