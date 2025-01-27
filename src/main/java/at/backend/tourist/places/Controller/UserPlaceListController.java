@@ -15,7 +15,8 @@ import java.util.Set;
 
 @RestController
 @RequiredArgsConstructor
-public class UserPlacesController {
+@RequestMapping("/v1/api/users/lists")
+public class UserPlaceListController {
 
     private final PlaceListService placeListService;
     private final JwtService jwtService;
@@ -26,7 +27,7 @@ public class UserPlacesController {
         return ResponseEntity.ok(createdList);
     }
 
-    @GetMapping("/user/{userId}")
+    @GetMapping("/my")
     public ResponseEntity<List<PlaceListDTO>> getMyLists(HttpServletRequest request) {
         Long userId = jwtService.getIdFromRequest(request);
 
@@ -34,13 +35,13 @@ public class UserPlacesController {
         return ResponseEntity.ok(placeLists);
     }
 
-    @PostMapping("/{placeListId}/places/add")
+    @PostMapping("/{placeListId}/add-place")
     public ResponseEntity<PlaceListDTO> addPlaces(@PathVariable Long placeListId, @RequestBody Set<Long> placeIds) {
         PlaceListDTO updatedList = placeListService.addPlaces(placeListId, placeIds);
         return ResponseEntity.ok(updatedList);
     }
 
-    @PostMapping("/{placeListId}/places/remove")
+    @PostMapping("/{placeListId}/remove-place")
     public ResponseEntity<PlaceListDTO> removePlaces(@PathVariable Long placeListId, @RequestBody Set<Long> placeIds) {
         PlaceListDTO updatedList = placeListService.removePlaces(placeListId, placeIds);
         return ResponseEntity.ok(updatedList);

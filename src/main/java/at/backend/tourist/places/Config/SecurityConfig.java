@@ -26,6 +26,7 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
@@ -62,8 +63,8 @@ public class SecurityConfig {
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
 
                         // User
-                        .requestMatchers("/v1/api/users/me").authenticated()
-                        .requestMatchers("/v1/api/users/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/v1/api/users/me", "/v1/api/users/lists/**").authenticated()
+                        .requestMatchers("/v1/api/users/admin").hasAuthority("ROLE_ADMIN")
 
                         // Public Access
                         .requestMatchers(HttpMethod.GET, "/**").permitAll()
@@ -83,6 +84,7 @@ public class SecurityConfig {
                         .authenticationEntryPoint((request, response, authException) -> {
                            jwtAuthFilter.validateTokenFormat(request, response, authException);
                         })
+                        .accessDeniedHandler(accessDeniedHandler())
                 );
 
         return http.build();
@@ -132,5 +134,14 @@ public class SecurityConfig {
 
         response.setContentType("application/json");
         response.getWriter().write("{\"tokens\":\"" + responseDTO + "\"}");
+    }
+
+    @Bean
+    public AccessDeniedHandler accessDeniedHandler() {
+        return (request, response, accessDeniedException) -> {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\": \"Access denied: insufficient authorities\"}");
+        };
     }
 }
