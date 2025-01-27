@@ -18,10 +18,11 @@ public class RefreshTokenGenerator implements TokenGenerator {
     }
 
     @Override
-    public String generateToken(String email, String role) {
+    public String generateToken(String email, Long userId, String role) {
         return Jwts.builder()
                 .setSubject(email)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
+                .claim("id",  userId)
                 .setExpiration(new Date(System.currentTimeMillis() + expiration * 1000))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS512)
                 .compact();

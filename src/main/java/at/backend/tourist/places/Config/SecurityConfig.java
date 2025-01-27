@@ -7,6 +7,7 @@ import at.backend.tourist.places.Service.UserService;
 import at.backend.tourist.places.Utils.Enum.Role;
 import at.backend.tourist.places.JWT.JwtAuthenticationFilter;
 import at.backend.tourist.places.JWT.JwtService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -130,7 +131,8 @@ public class SecurityConfig {
 
         System.out.println("Roles: " + oauth2User.getAuthorities());
 
-        LoginResponseDTO responseDTO = jwtService.generateLoginTokens(email, role);
+        User user = userRepository.findByEmail(email).orElseThrow( () -> new EntityNotFoundException("User Not Found"));
+        LoginResponseDTO responseDTO = jwtService.generateLoginTokens(email, user.getId(), role);
 
         response.setContentType("application/json");
         response.getWriter().write("{\"tokens\":\"" + responseDTO + "\"}");

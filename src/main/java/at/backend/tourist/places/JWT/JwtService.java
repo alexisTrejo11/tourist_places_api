@@ -26,24 +26,31 @@ public class JwtService {
 
     private final RedisTokenService redisTokenService;
 
-    public String generateAccessToken(String email, String role) {
+    public String generateAccessToken(String email, Long userId, String role) {
         TokenGenerator tokenGenerator = tokenFactory.getTokenGenerator("access");
-        return tokenGenerator.generateToken(email, role);
+        return tokenGenerator.generateToken(email, userId, role);
     }
 
-    public String generateRefreshToken(String email) {
+    public String generateRefreshToken(String email, Long userId, String role) {
         TokenGenerator tokenGenerator = tokenFactory.getTokenGenerator("refresh");
-        return tokenGenerator.generateToken(email, "");
+        return tokenGenerator.generateToken(email, userId, role);
     }
 
     public String generateResetToken(String email) {
         TokenGenerator tokenGenerator = tokenFactory.getTokenGenerator("reset");
-        return tokenGenerator.generateToken(email, "");
+        return tokenGenerator.generateToken(email, 0L, "");
     }
 
     public String generateActivateToken(String email) {
         TokenGenerator tokenGenerator = tokenFactory.getTokenGenerator("activation");
-        return tokenGenerator.generateToken(email, "");
+        return tokenGenerator.generateToken(email, 0L, "");
+    }
+
+    public LoginResponseDTO generateLoginTokens(String email, Long userId ,String role) {
+        String accessToken = tokenFactory.getTokenGenerator("access").generateToken(email, userId, role);
+        String refreshToken = tokenFactory.getTokenGenerator("refresh").generateToken(email, userId, role);
+
+        return new LoginResponseDTO(accessToken, refreshToken);
     }
 
     public String getEmailFromToken(String token) {
@@ -107,14 +114,11 @@ public class JwtService {
         }
 
         String token = authHeader.substring(7).trim();
-        return 6L;
+        return getIdFromToken(token);
     }
 
-    public LoginResponseDTO generateLoginTokens(String email, String role) {
-        String accessToken = tokenFactory.getTokenGenerator("access").generateToken(email, role);
-        String refreshToken = tokenFactory.getTokenGenerator("refresh").generateToken(email, "");
-
-        return new LoginResponseDTO(accessToken, refreshToken);
+    public void deleteToken(String token) {
+        redisTokenService.deleteToken(token);
     }
 
     private Key getSigningKey() {
@@ -122,7 +126,12 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public void deleteToken(String token) {
-        redisTokenService.deleteToken(token);
+    public Long getIdFromToken(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("userId", Long.class);
     }
 }

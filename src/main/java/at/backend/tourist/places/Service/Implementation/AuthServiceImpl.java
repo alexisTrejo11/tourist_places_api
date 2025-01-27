@@ -82,7 +82,7 @@ public class AuthServiceImpl implements AuthService {
     public LoginResponseDTO processLogin(UserDTO userDTO) {
         userRepository.updateLastLoginByEmail(userDTO.getEmail());
 
-        return jwtService.generateLoginTokens(userDTO.getEmail(), userDTO.getRole().toString());
+        return jwtService.generateLoginTokens(userDTO.getEmail(), userDTO.getId() ,userDTO.getRole().toString());
     }
 
     @Override

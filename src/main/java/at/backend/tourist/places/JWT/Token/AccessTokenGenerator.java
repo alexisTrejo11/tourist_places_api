@@ -17,10 +17,11 @@ public class AccessTokenGenerator implements TokenGenerator {
     }
 
     @Override
-    public String generateToken(String email, String role) {
+    public String generateToken(String email, Long userId , String role) {
         return Jwts.builder()
                 .setSubject(email)
                 .claim("role", "ROLE_" + role)
+                .claim("id",  userId)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration * 1000))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS512)
