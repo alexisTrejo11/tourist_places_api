@@ -22,7 +22,11 @@ public class UserPlaceListController {
     private final JwtService jwtService;
 
     @PostMapping
-    public ResponseEntity<PlaceListDTO> newList(@Valid @RequestBody PlaceListInsertDTO insertDTO) {
+    public ResponseEntity<PlaceListDTO> newList(@Valid @RequestBody PlaceListInsertDTO insertDTO,
+                                                HttpServletRequest request) {
+        Long userId = jwtService.getIdFromRequest(request);
+
+        insertDTO.setUserId(userId);
         PlaceListDTO createdList = placeListService.create(insertDTO);
         return ResponseEntity.ok(createdList);
     }

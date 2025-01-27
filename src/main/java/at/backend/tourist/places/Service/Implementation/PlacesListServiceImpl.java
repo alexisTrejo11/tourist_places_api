@@ -106,7 +106,7 @@ public class PlacesListServiceImpl implements PlaceListService {
                 .filter(place -> placeIds.contains(place.getId()))
                 .toList();
 
-        placeList.getPlaces().removeAll(placesToRemove);
+        placesToRemove.forEach(placeList.getPlaces()::remove);
 
         placeListRepository.saveAndFlush(placeList);
 

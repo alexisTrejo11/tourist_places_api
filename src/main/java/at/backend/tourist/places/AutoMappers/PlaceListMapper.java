@@ -8,6 +8,8 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface PlaceListMapper {
+
+    @Mapping(target = "userId", source = "user.id")
     PlaceListDTO entityToDTO(PlaceList placeList);
 
     @Mapping(target = "id", ignore = true)
