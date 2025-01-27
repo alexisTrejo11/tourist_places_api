@@ -2,6 +2,10 @@ spring:
   application:
     name: Tourist Places
 
+  flyway:
+    locations: classpath:db/migrations
+    baseline-on-migrate: true
+
   security:
     oauth2:
       client:
@@ -50,8 +54,8 @@ spring:
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
-    hibernate:
-      ddl-auto: update
+    #hibernate:
+    #  ddl-auto: update
 
 
 web:
@@ -83,5 +87,3 @@ springdoc:
           type: http
           scheme: bearer
           bearerFormat: JWT
-
-
