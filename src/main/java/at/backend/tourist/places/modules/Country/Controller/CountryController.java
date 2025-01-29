@@ -10,6 +10,7 @@ import at.backend.tourist.places.core.Utils.Result;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -44,7 +45,7 @@ public class CountryController {
 
     @Operation(summary = "Get a country by its name", description = "Retrieve detailed information about a country by its name.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Country found", content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.USER_FOUND))),
+            @ApiResponse(responseCode = "200", description = "Country found", content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.COUNTRY))),
             @ApiResponse(responseCode = "404", description = "Country not found", content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.NOT_FOUND)))
     })
     @GetMapping("/name/{name}")
@@ -59,7 +60,7 @@ public class CountryController {
 
     @Operation(summary = "Get countries by continent", description = "Retrieve a list of countries belonging to a specific continent.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Countries found", content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.USER_FOUND))),
+            @ApiResponse(responseCode = "200", description = "Countries found", content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.COUNTRY))),
             @ApiResponse(responseCode = "400", description = "Invalid continent", content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.BAD_REQUEST)))
     })
     @GetMapping("/by-continent/{continentSTR}")
@@ -70,8 +71,8 @@ public class CountryController {
         return ResponseWrapper.found(countries, "Countries");
     }
 
-    @Operation(summary = "Get all countries", description = "Retrieve a list of all countries.")
-    @ApiResponse(responseCode = "200", description = "List of countries retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.USER_FOUND)))
+    @Operation(summary = "Get all countries", description = "Retrieve a list of all countries." )
+    @ApiResponse(responseCode = "200", description = "List of countries retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.COUNTRIES)))
     @GetMapping
     public ResponseWrapper<List<CountryDTO>> getAllCountries() {
         List<CountryDTO> countries = countryService.getAll();
@@ -84,8 +85,10 @@ public class CountryController {
             security = @SecurityRequirement(name = "admin")
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Country created successfully", content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.CREATED))),
-            @ApiResponse(responseCode = "400", description = "Validation error or invalid input", content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.BAD_REQUEST)))
+            @ApiResponse(responseCode = "201", description = "Country created successfully", content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.COUNTRY_CREATED))),
+            @ApiResponse(responseCode = "400", description = "Validation error or invalid input", content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.BAD_REQUEST))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, user not authenticated", content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.UNAUTHORIZED_ACCESS))),
+            @ApiResponse(responseCode = "403", description = "Forbidden, user lacks necessary permissions (admin required)", content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.FORBIDDEN)))
     })
     @PostMapping
     public ResponseWrapper<CountryDTO> createCountry(@Valid @RequestBody CountryInsertDTO insertDTO) {
@@ -97,14 +100,12 @@ public class CountryController {
         return ResponseWrapper.created(createdCountry, "Country");
     }
 
-    @Operation(
-            summary = "Delete a country by its ID",
-            description = "Delete an existing country. **Requires ADMIN role**.",
-            security = @SecurityRequirement(name = "admin")
-    )
+    @Operation(summary = "Delete a country by its ID", description = "Delete an existing country. **Requires ADMIN role**.",security = @SecurityRequirement(name = "admin"))
     @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Country deleted successfully", content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.NO_CONTENT))),
-            @ApiResponse(responseCode = "404", description = "Country not found", content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.NOT_FOUND)))
+            @ApiResponse(responseCode = "204", description = "Country deleted successfully", content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.SUCCESS))),
+            @ApiResponse(responseCode = "404", description = "Country not found", content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.NOT_FOUND))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, user not authenticated", content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.UNAUTHORIZED_ACCESS))),
+            @ApiResponse(responseCode = "403", description = "Forbidden, user lacks necessary permissions (admin required)", content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.FORBIDDEN)))
     })
     @DeleteMapping("/{id}")
     public ResponseWrapper<Void> deleteCountry(

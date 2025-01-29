@@ -63,7 +63,7 @@ public class ActivityController {
 
     @Operation(summary = "Get activities by tourist place ID", description = "Retrieve a list of activities associated with a specific tourist place.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = ApiConstants.ACTIVITIES_RETRIEVED, content = @Content(schema = @Schema(implementation = ActivityDTO.class))),
+            @ApiResponse(responseCode = "200", description = ApiConstants.ACTIVITIES_RETRIEVED, content = @Content(schema = @Schema(example = ApiResponseExamples.ACTIVITY))),
             @ApiResponse(responseCode = "404", description = "Activities not found", content = @Content(schema = @Schema(example = ApiResponseExamples.NOT_FOUND))),
             @ApiResponse(responseCode = "403", description = "Forbidden access to the activities of this tourist place", content = @Content(schema = @Schema(example = ApiResponseExamples.FORBIDDEN)))
     })
@@ -80,7 +80,7 @@ public class ActivityController {
 
     @Operation(summary = "Create a new activity", description = "Add a new activity to the system.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = ApiConstants.ACTIVITY_CREATED, content = @Content(schema = @Schema(implementation = ActivityDTO.class))),
+            @ApiResponse(responseCode = "201", description = ApiConstants.ACTIVITY_CREATED, content = @Content(schema = @Schema(example =ApiResponseExamples.ACTIVITY_CREATED))),
             @ApiResponse(responseCode = "400", description = ApiConstants.INVALID_INPUT_DATA, content = @Content(schema = @Schema(example = ApiResponseExamples.BAD_REQUEST))),
             @ApiResponse(responseCode = "403", description = "Forbidden to create activity for the user", content = @Content(schema = @Schema(example = ApiResponseExamples.FORBIDDEN)))
     })

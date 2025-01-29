@@ -34,24 +34,14 @@ public class UserPlaceListController {
     private final JwtService jwtService;
 
     @PostMapping
-    @Operation(
-            summary = "Create a new place list",
-            description = "Creates a new place list for the authenticated user."
-    )
+    @Operation(summary = "Create a new place list", description = "Creates a new place list for the authenticated user.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Place list created successfully",
-                    content = @Content(schema = @Schema(implementation = PlaceListDTO.class),
-                            examples = @ExampleObject(value = ApiResponseExamples.CREATED))),
-            @ApiResponse(responseCode = "400", description = "Invalid input",
-                    content = @Content(schema = @Schema(implementation = String.class),
-                            examples = @ExampleObject(value = ApiResponseExamples.BAD_REQUEST))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized",
-                    content = @Content(schema = @Schema(implementation = String.class),
-                            examples = @ExampleObject(value = ApiResponseExamples.UNAUTHORIZED_ACCESS)))
+            @ApiResponse(responseCode = "200", description = "Place list created successfully", content = @Content(schema = @Schema(implementation = PlaceListDTO.class), examples = @ExampleObject(value = ApiResponseExamples.PLACE_LIST))),
+            @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content(schema = @Schema(implementation = String.class), examples = @ExampleObject(value = ApiResponseExamples.BAD_REQUEST))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(implementation = String.class), examples = @ExampleObject(value = ApiResponseExamples.UNAUTHORIZED_ACCESS)))
     })
-    public ResponseEntity<PlaceListDTO> newList(
-            @Valid @RequestBody PlaceListInsertDTO insertDTO,
-            HttpServletRequest request
+    public ResponseEntity<PlaceListDTO> newList(@Valid @RequestBody PlaceListInsertDTO insertDTO,
+                                                HttpServletRequest request
     ) {
         Long userId = jwtService.getIdFromRequest(request);
         insertDTO.setUserId(userId);
@@ -60,17 +50,10 @@ public class UserPlaceListController {
     }
 
     @GetMapping("/mine")
-    @Operation(
-            summary = "Get my place lists",
-            description = "Retrieves all place lists for the authenticated user."
-    )
+    @Operation(summary = "Get my place lists", description = "Retrieves all place lists for the authenticated user.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Place lists retrieved successfully",
-                    content = @Content(schema = @Schema(implementation = List.class),
-                            examples = @ExampleObject(value = ApiResponseExamples.SUCCESS))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized",
-                    content = @Content(schema = @Schema(implementation = String.class),
-                            examples = @ExampleObject(value = ApiResponseExamples.UNAUTHORIZED_ACCESS)))
+            @ApiResponse(responseCode = "200", description = "Place lists retrieved successfully", content = @Content(schema = @Schema(implementation = List.class), examples = @ExampleObject(value = ApiResponseExamples.PLACE_LISTS))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(implementation = String.class), examples = @ExampleObject(value = ApiResponseExamples.UNAUTHORIZED_ACCESS)))
     })
     public ResponseEntity<List<PlaceListDTO>> getMyLists(HttpServletRequest request) {
         Long userId = jwtService.getIdFromRequest(request);
@@ -79,23 +62,12 @@ public class UserPlaceListController {
     }
 
     @PostMapping("/{placeListId}/add-place")
-    @Operation(
-            summary = "Add places to a list",
-            description = "Adds one or more places to an existing place list."
-    )
+    @Operation(summary = "Add places to a list", description = "Adds one or more places to an existing place list.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Places added successfully",
-                    content = @Content(schema = @Schema(implementation = PlaceListDTO.class),
-                            examples = @ExampleObject(value = ApiResponseExamples.SUCCESS))),
-            @ApiResponse(responseCode = "400", description = "Invalid input",
-                    content = @Content(schema = @Schema(implementation = String.class),
-                            examples = @ExampleObject(value = ApiResponseExamples.BAD_REQUEST))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized",
-                    content = @Content(schema = @Schema(implementation = String.class),
-                            examples = @ExampleObject(value = ApiResponseExamples.UNAUTHORIZED_ACCESS))),
-            @ApiResponse(responseCode = "404", description = "Place list not found",
-                    content = @Content(schema = @Schema(implementation = String.class),
-                            examples = @ExampleObject(value = ApiResponseExamples.NOT_FOUND)))
+            @ApiResponse(responseCode = "200", description = "Places added successfully", content = @Content(schema = @Schema(implementation = PlaceListDTO.class), examples = @ExampleObject(value = ApiResponseExamples.PLACE_LISTS))),
+            @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content(schema = @Schema(implementation = String.class), examples = @ExampleObject(value = ApiResponseExamples.BAD_REQUEST))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(implementation = String.class), examples = @ExampleObject(value = ApiResponseExamples.UNAUTHORIZED_ACCESS))),
+            @ApiResponse(responseCode = "404", description = "Place list not found", content = @Content(schema = @Schema(implementation = String.class), examples = @ExampleObject(value = ApiResponseExamples.NOT_FOUND)))
     })
     public ResponseEntity<PlaceListDTO> addPlaces(
             @Parameter(description = "ID of the place list to update", required = true)
@@ -108,27 +80,15 @@ public class UserPlaceListController {
     }
 
     @PostMapping("/{placeListId}/remove-place")
-    @Operation(
-            summary = "Remove places from a list",
-            description = "Removes one or more places from an existing place list."
-    )
+    @Operation(summary = "Remove places from a list", description = "Removes one or more places from an existing place list.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Places removed successfully",
-                    content = @Content(schema = @Schema(implementation = PlaceListDTO.class),
-                            examples = @ExampleObject(value = ApiResponseExamples.SUCCESS))),
-            @ApiResponse(responseCode = "400", description = "Invalid input",
-                    content = @Content(schema = @Schema(implementation = String.class),
-                            examples = @ExampleObject(value = ApiResponseExamples.BAD_REQUEST))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized",
-                    content = @Content(schema = @Schema(implementation = String.class),
-                            examples = @ExampleObject(value = ApiResponseExamples.UNAUTHORIZED_ACCESS))),
-            @ApiResponse(responseCode = "404", description = "Place list not found",
-                    content = @Content(schema = @Schema(implementation = String.class),
-                            examples = @ExampleObject(value = ApiResponseExamples.NOT_FOUND)))
+            @ApiResponse(responseCode = "200", description = "Places removed successfully", content = @Content(schema = @Schema(implementation = PlaceListDTO.class), examples = @ExampleObject(value = ApiResponseExamples.SUCCESS))),
+            @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content(schema = @Schema(implementation = String.class), examples = @ExampleObject(value = ApiResponseExamples.BAD_REQUEST))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(implementation = String.class), examples = @ExampleObject(value = ApiResponseExamples.UNAUTHORIZED_ACCESS))),
+            @ApiResponse(responseCode = "404", description = "Place list not found", content = @Content(schema = @Schema(implementation = String.class), examples = @ExampleObject(value = ApiResponseExamples.NOT_FOUND)))
     })
     public ResponseEntity<PlaceListDTO> removePlaces(
-            @Parameter(description = "ID of the place list to update", required = true)
-            @PathVariable Long placeListId,
+            @Parameter(description = "ID of the place list to update", required = true) @PathVariable Long placeListId,
             @Parameter(description = "Set of place IDs to remove", required = true)
             @RequestBody Set<Long> placeIds
     ) {
@@ -137,20 +97,11 @@ public class UserPlaceListController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(
-            summary = "Delete a place list",
-            description = "Deletes a place list owned by the authenticated user."
-    )
+    @Operation(summary = "Delete a place list", description = "Deletes a place list owned by the authenticated user.")
     @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Place list deleted successfully",
-                    content = @Content(schema = @Schema(implementation = Void.class),
-                            examples = @ExampleObject(value = ApiResponseExamples.NO_CONTENT))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized",
-                    content = @Content(schema = @Schema(implementation = String.class),
-                            examples = @ExampleObject(value = ApiResponseExamples.UNAUTHORIZED_ACCESS))),
-            @ApiResponse(responseCode = "404", description = "Place list not found",
-                    content = @Content(schema = @Schema(implementation = String.class),
-                            examples = @ExampleObject(value = ApiResponseExamples.NOT_FOUND)))
+            @ApiResponse(responseCode = "204", description = "Place list deleted successfully", content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.NO_CONTENT))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, user not authenticated", content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.UNAUTHORIZED_ACCESS))),
+            @ApiResponse(responseCode = "404", description = "Place list not found", content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.NOT_FOUND)))
     })
     public ResponseEntity<Void> deleteMyList(
             @Parameter(description = "ID of the place list to delete", required = true)

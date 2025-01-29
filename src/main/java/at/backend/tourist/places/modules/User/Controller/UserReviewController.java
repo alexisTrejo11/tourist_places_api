@@ -42,7 +42,7 @@ public class UserReviewController {
     @Operation(summary = "Get user reviews", description = "Fetches user reviews with pagination support.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of reviews retrieved successfully",
-                    content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ApiResponseExamples.SUCCESS))
+                    content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ApiResponseExamples.REVIEW))
             ),
             @ApiResponse(responseCode = "400", description = "Invalid pagination parameters",
                     content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ApiResponseExamples.BAD_REQUEST))
@@ -77,7 +77,7 @@ public class UserReviewController {
     @Operation(summary = "Create a new review", description = "Allows a user to create a new review for a tourist place.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Review created successfully",
-                    content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ApiResponseExamples.CREATED))
+                    content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ApiResponseExamples.REVIEW_CREATED))
             ),
             @ApiResponse(responseCode = "400", description = "Validation error",
                     content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ApiResponseExamples.BAD_REQUEST))
@@ -108,7 +108,7 @@ public class UserReviewController {
     @Operation(summary = "Update an existing review", description = "Allows a user to update one of their reviews.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Review updated successfully",
-                    content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ApiResponseExamples.SUCCESS))
+                    content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ApiResponseExamples.REVIEW))
             ),
             @ApiResponse(responseCode = "400", description = "Validation error",
                     content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ApiResponseExamples.BAD_REQUEST))
@@ -144,7 +144,7 @@ public class UserReviewController {
     @Operation(summary = "Delete a review", description = "Deletes a user review by its ID.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Review deleted successfully",
-                    content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ApiResponseExamples.NO_CONTENT))
+                    content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ApiResponseExamples.SUCCESS))
             ),
             @ApiResponse(responseCode = "404", description = "Review not found",
                     content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ApiResponseExamples.NOT_FOUND))
