@@ -1,12 +1,12 @@
 package at.backend.tourist.places.modules.Review.Controller;
 
 import at.backend.tourist.places.core.SwaggerHelper.ApiResponseExamples;
-import at.backend.tourist.places.core.Utils.ResponseWrapper;
+import at.backend.tourist.places.core.Utils.Response.ResponseWrapper;
 import at.backend.tourist.places.modules.Review.DTOs.ReviewDTO;
 import at.backend.tourist.places.modules.Review.DTOs.ReviewInsertDTO;
 import at.backend.tourist.places.modules.Review.Service.ReviewService;
 import at.backend.tourist.places.modules.Places.Service.TouristPlaceService;
-import at.backend.tourist.places.core.Utils.Result;
+import at.backend.tourist.places.core.Utils.Response.Result;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -26,8 +26,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("v1/api/reviews")
 @RequiredArgsConstructor
@@ -38,31 +36,24 @@ public class ReviewController {
     private final ReviewService reviewService;
     private final TouristPlaceService touristPlaceService;
 
-    @Operation(summary = "Get all reviews", description = "Fetches all reviews in the system")
+    @Operation(summary = "Get all reviews", description = "Fetches all reviews in the system. **Requires ADMIN role**.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "List of all reviews retrieved successfully",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ResponseWrapper.class),
-                            examples = @ExampleObject(value = ApiResponseExamples.REVIEWS))),
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseWrapper.class), examples = @ExampleObject(value = ApiResponseExamples.REVIEWS))),
             @ApiResponse(responseCode = "401", description = "Unauthorized",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(example = ApiResponseExamples.UNAUTHORIZED_ACCESS)))
+                    content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.UNAUTHORIZED_ACCESS)))
     })
     @GetMapping
     public ResponseWrapper<List<ReviewDTO>> getAllReviews() {
         return ResponseWrapper.found(reviewService.getAll(), "Reviews");
     }
 
-    @Operation(summary = "Get reviews by tourist place ID",
-            description = "Fetches all reviews associated with a specific tourist place")
+    @Operation(summary = "Get reviews by tourist place ID",description = "Fetches all reviews associated with a specific tourist place. **Requires ADMIN role**.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Reviews retrieved successfully",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ResponseWrapper.class),
-                            examples = @ExampleObject(value = ApiResponseExamples.REVIEWS))),
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseWrapper.class), examples = @ExampleObject(value = ApiResponseExamples.REVIEWS))),
             @ApiResponse(responseCode = "404", description = "No reviews found",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(example = ApiResponseExamples.NOT_FOUND)))
+                    content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.NOT_FOUND)))
     })
     @GetMapping("tourist_place/{touristPlaceId}")
     public ResponseEntity<List<ReviewDTO>> getByTouristPlaceId(
@@ -73,15 +64,12 @@ public class ReviewController {
         return ResponseEntity.ok(reviews);
     }
 
-    @Operation(summary = "Get review by ID", description = "Fetches a specific review by its ID")
+    @Operation(summary = "Get review by ID", description = "Fetches a specific review by its ID. **Requires ADMIN role**.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Review retrieved successfully",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ResponseWrapper.class),
-                            examples = @ExampleObject(value = ApiResponseExamples.REVIEW))),
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseWrapper.class), examples = @ExampleObject(value = ApiResponseExamples.REVIEW))),
             @ApiResponse(responseCode = "404", description = "Review not found",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(example = ApiResponseExamples.NOT_FOUND)))
+                    content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.NOT_FOUND)))
     })
     @GetMapping("/{id}")
     public ResponseEntity<ResponseWrapper<ReviewDTO>> getReviewById(
@@ -92,15 +80,12 @@ public class ReviewController {
         return ResponseEntity.ok(ResponseWrapper.found(review, "Review"));
     }
 
-    @Operation(summary = "Create a new review", description = "Creates a new review with the provided details")
+    @Operation(summary = "Create a new review", description = "Creates a new review with the provided details. **Requires ADMIN role**.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Review created successfully",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ResponseWrapper.class),
-                            examples = @ExampleObject(value = ApiResponseExamples.REVIEW_CREATED))),
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseWrapper.class), examples = @ExampleObject(value = ApiResponseExamples.REVIEW_CREATED))),
             @ApiResponse(responseCode = "400", description = "Invalid input",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(example = ApiResponseExamples.BAD_REQUEST))),
+                    content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.BAD_REQUEST))),
             @ApiResponse(responseCode = "401", description = "Unauthorized",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(example = ApiResponseExamples.UNAUTHORIZED_ACCESS)))
@@ -115,7 +100,7 @@ public class ReviewController {
         return ResponseEntity.status(HttpStatus.CREATED).body(ResponseWrapper.created(createdReview, "Review"));
     }
 
-    @Operation(summary = "Delete a review", description = "Deletes a review by its ID")
+    @Operation(summary = "Delete a review", description = "Deletes a review by its ID. **Requires ADMIN role**.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Review deleted successfully",
                     content = @Content(mediaType = "application/json",

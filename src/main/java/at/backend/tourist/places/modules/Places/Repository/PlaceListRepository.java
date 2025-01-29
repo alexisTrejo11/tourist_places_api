@@ -1,6 +1,6 @@
-package at.backend.tourist.places.modules.Places.Service;
+package at.backend.tourist.places.modules.Places.Repository;
 
-import at.backend.tourist.places.modules.Places.PlaceList;
+import at.backend.tourist.places.modules.Places.Models.PlaceList;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

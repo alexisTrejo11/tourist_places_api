@@ -1,7 +1,7 @@
 package at.backend.tourist.places.modules.User.Controller;
 
 import at.backend.tourist.places.core.SwaggerHelper.ApiResponseExamples;
-import at.backend.tourist.places.core.Utils.ResponseWrapper;
+import at.backend.tourist.places.core.Utils.Response.ResponseWrapper;
 import at.backend.tourist.places.modules.User.DTOs.UserDTO;
 import at.backend.tourist.places.modules.User.DTOs.UserInsertDTO;
 import at.backend.tourist.places.modules.User.Service.UserService;
@@ -40,12 +40,9 @@ public class UserController {
     @Operation(summary = "Get current logged-in user", description = "Fetches the details of the currently logged-in user based on the JWT token")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "User details retrieved",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ResponseWrapper.class),
-                            examples = @ExampleObject(value = ApiResponseExamples.USER))),
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseWrapper.class), examples = @ExampleObject(value = ApiResponseExamples.USER))),
             @ApiResponse(responseCode = "401", description = "Unauthorized",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(example = ApiResponseExamples.UNAUTHORIZED_ACCESS)))
+                    content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.UNAUTHORIZED_ACCESS)))
     })
     @GetMapping("/me")
     private ResponseEntity<ResponseWrapper<UserDTO>> me(HttpServletRequest request) {

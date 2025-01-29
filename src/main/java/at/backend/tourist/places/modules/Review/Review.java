@@ -1,6 +1,6 @@
 package at.backend.tourist.places.modules.Review;
 
-import at.backend.tourist.places.modules.Places.TouristPlace;
+import at.backend.tourist.places.modules.Places.Models.TouristPlace;
 import at.backend.tourist.places.modules.User.Model.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

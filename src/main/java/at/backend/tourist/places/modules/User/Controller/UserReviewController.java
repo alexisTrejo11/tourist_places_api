@@ -1,14 +1,14 @@
 package at.backend.tourist.places.modules.User.Controller;
 
 import at.backend.tourist.places.core.SwaggerHelper.ApiResponseExamples;
-import at.backend.tourist.places.core.Utils.ResponseWrapper;
+import at.backend.tourist.places.core.Utils.Response.ResponseWrapper;
 import at.backend.tourist.places.modules.Review.DTOs.ReviewDTO;
 import at.backend.tourist.places.modules.Review.DTOs.ReviewInsertDTO;
 import at.backend.tourist.places.modules.Review.DTOs.ReviewUpdateDTO;
 import at.backend.tourist.places.modules.Review.Service.ReviewService;
 import at.backend.tourist.places.modules.Places.Service.TouristPlaceService;
 import at.backend.tourist.places.modules.Auth.JWT.JwtService;
-import at.backend.tourist.places.core.Utils.Result;
+import at.backend.tourist.places.core.Utils.Response.Result;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;

@@ -1,6 +1,6 @@
 package at.backend.tourist.places.modules.Places.Controller;
 
-import at.backend.tourist.places.core.Utils.ResponseWrapper;
+import at.backend.tourist.places.core.Utils.Response.ResponseWrapper;
 import at.backend.tourist.places.modules.Places.DTOs.PlaceCategoryDTO;
 import at.backend.tourist.places.modules.Places.DTOs.PlaceCategoryInsertDTO;
 import at.backend.tourist.places.modules.Places.Service.PlaceCategoryService;
@@ -27,7 +27,7 @@ public class PlaceCategoryController {
             description = "Retrieves a list of all place categories available",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Successful retrieval of place categories",
-                            content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.USER_FOUND))),
+                            content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.USER))),
                     @ApiResponse(responseCode = "404", description = "Place categories not found",
                             content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.NOT_FOUND)))
             }
@@ -42,7 +42,7 @@ public class PlaceCategoryController {
             description = "Retrieves the details of a specific place category by its ID",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Successful retrieval of the place category",
-                            content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.USER_FOUND))),
+                            content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.USER))),
                     @ApiResponse(responseCode = "404", description = "Place category not found",
                             content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.NOT_FOUND)))
             }
@@ -79,7 +79,7 @@ public class PlaceCategoryController {
 
     @Operation(
             summary = "Delete a place category",
-            description = "Deletes a specific place category by its ID (admin role required)",
+            description = "Deletes a specific place category by its ID **Requires ADMIN role**.",
             security = @SecurityRequirement(name = "bearerAuth"),
             responses = {
                     @ApiResponse(responseCode = "204", description = "Place category deleted successfully",

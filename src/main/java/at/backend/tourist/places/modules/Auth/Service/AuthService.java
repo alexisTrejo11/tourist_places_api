@@ -4,7 +4,7 @@ import at.backend.tourist.places.modules.Auth.DTOs.LoginDTO;
 import at.backend.tourist.places.modules.Auth.DTOs.LoginResponseDTO;
 import at.backend.tourist.places.modules.Auth.DTOs.SignupDTO;
 import at.backend.tourist.places.modules.User.DTOs.UserDTO;
-import at.backend.tourist.places.core.Utils.Result;
+import at.backend.tourist.places.core.Utils.Response.Result;
 
 public interface AuthService {
     Result<Void> validateSignup(SignupDTO signupDTO);

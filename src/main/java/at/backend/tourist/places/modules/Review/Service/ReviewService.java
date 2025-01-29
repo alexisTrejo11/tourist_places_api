@@ -4,7 +4,7 @@ import at.backend.tourist.places.modules.Review.DTOs.ReviewDTO;
 import at.backend.tourist.places.modules.Review.DTOs.ReviewInsertDTO;
 import at.backend.tourist.places.modules.Review.DTOs.ReviewUpdateDTO;
 import at.backend.tourist.places.core.Service.CommonService;
-import at.backend.tourist.places.core.Utils.Result;
+import at.backend.tourist.places.core.Utils.Response.Result;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

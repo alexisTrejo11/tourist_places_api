@@ -1,6 +1,6 @@
 package at.backend.tourist.places.modules.Country.Repository;
 
-import at.backend.tourist.places.modules.Places.TouristPlace;
+import at.backend.tourist.places.modules.Places.Models.TouristPlace;
 import at.backend.tourist.places.core.Utils.Enum.Continent;
 import at.backend.tourist.places.modules.Country.Country;
 import org.springframework.data.domain.Page;

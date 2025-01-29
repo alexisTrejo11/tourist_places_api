@@ -2,7 +2,7 @@ package at.backend.tourist.places.modules.Auth.Controller;
 
 import at.backend.tourist.places.modules.User.Model.User;
 import at.backend.tourist.places.modules.User.Repository.UserRepository;
-import at.backend.tourist.places.core.Utils.Result;
+import at.backend.tourist.places.core.Utils.Response.Result;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;

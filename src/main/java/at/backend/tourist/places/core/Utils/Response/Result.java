@@ -1,4 +1,4 @@
-package at.backend.tourist.places.core.Utils;
+package at.backend.tourist.places.core.Utils.Response;
 
 
 import lombok.Getter;

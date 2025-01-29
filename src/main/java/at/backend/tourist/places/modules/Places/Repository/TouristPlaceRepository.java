@@ -1,6 +1,6 @@
-package at.backend.tourist.places.modules.Places.Service;
+package at.backend.tourist.places.modules.Places.Repository;
 
-import at.backend.tourist.places.modules.Places.TouristPlace;
+import at.backend.tourist.places.modules.Places.Models.TouristPlace;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;

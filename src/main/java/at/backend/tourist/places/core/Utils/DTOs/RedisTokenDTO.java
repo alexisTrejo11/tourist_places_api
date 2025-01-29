@@ -1,4 +1,4 @@
-package at.backend.tourist.places.core.Utils;
+package at.backend.tourist.places.core.Utils.DTOs;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

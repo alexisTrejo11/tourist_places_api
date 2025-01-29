@@ -1,7 +1,7 @@
 package at.backend.tourist.places.modules.Country;
 
 import at.backend.tourist.places.core.Utils.Enum.Continent;
-import at.backend.tourist.places.modules.Places.TouristPlace;
+import at.backend.tourist.places.modules.Places.Models.TouristPlace;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;

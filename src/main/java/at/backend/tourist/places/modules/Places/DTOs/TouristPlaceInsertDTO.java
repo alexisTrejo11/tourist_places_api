@@ -1,6 +1,6 @@
 package at.backend.tourist.places.modules.Places.DTOs;
 
-import at.backend.tourist.places.core.Utils.PlaceRelationships;
+import at.backend.tourist.places.modules.Places.Models.PlaceRelationships;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;

@@ -1,12 +1,12 @@
 package at.backend.tourist.places.modules.Places.Controller;
 
-import at.backend.tourist.places.core.Utils.ResponseWrapper;
+import at.backend.tourist.places.core.Utils.Response.ResponseWrapper;
 import at.backend.tourist.places.modules.Places.DTOs.TouristPlaceDTO;
 import at.backend.tourist.places.modules.Places.DTOs.TouristPlaceInsertDTO;
 import at.backend.tourist.places.modules.Places.DTOs.TouristPlaceSearchDTO;
 import at.backend.tourist.places.modules.Places.Service.TouristPlaceService;
-import at.backend.tourist.places.core.Utils.PlaceRelationships;
-import at.backend.tourist.places.core.Utils.Result;
+import at.backend.tourist.places.modules.Places.Models.PlaceRelationships;
+import at.backend.tourist.places.core.Utils.Response.Result;
 import at.backend.tourist.places.core.SwaggerHelper.ApiResponseExamples;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,7 +100,12 @@ public class TouristPlaceController {
         return places.isEmpty() ? ResponseWrapper.notFound("Tourist Places for Category ID: " + categoryId) : ResponseWrapper.found(places, "Tourist Places");
     }
 
-    @Operation(summary = "Create a new tourist place", description = "Create a new tourist place with the provided details.")
+
+    @Operation(
+            summary = "Create a new tourist place",
+            description = "Create a new tourist place with the provided details. **Requires ADMIN role**.",
+            security = @SecurityRequirement(name = "admin")
+    )
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Tourist place created successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid input or validation failed",
@@ -125,7 +131,11 @@ public class TouristPlaceController {
         return ResponseWrapper.created(createdTouristPlace, "Tourist Place");
     }
 
-    @Operation(summary = "Delete a tourist place by ID", description = "Delete a tourist place from the system using its unique ID.")
+    @Operation(
+            summary = "Delete a tourist place by ID",
+            description = "Delete a tourist place from the system using its unique ID. **Requires ADMIN role**.",
+            security = @SecurityRequirement(name = "admin")
+    )
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Tourist place deleted successfully"),
             @ApiResponse(responseCode = "404", description = "Tourist place not found",

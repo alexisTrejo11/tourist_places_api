@@ -1,6 +1,6 @@
 package at.backend.tourist.places.modules.User.Model;
 
-import at.backend.tourist.places.modules.Places.PlaceList;
+import at.backend.tourist.places.modules.Places.Models.PlaceList;
 import at.backend.tourist.places.modules.Review.Review;
 import at.backend.tourist.places.core.Utils.Enum.Role;
 import jakarta.persistence.*;

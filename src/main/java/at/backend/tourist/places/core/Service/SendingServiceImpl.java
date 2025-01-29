@@ -1,6 +1,6 @@
 package at.backend.tourist.places.core.Service;
 
-import at.backend.tourist.places.core.Utils.EmailSendingDTO;
+import at.backend.tourist.places.core.Utils.DTOs.EmailSendingDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;

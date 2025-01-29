@@ -6,7 +6,7 @@ import at.backend.tourist.places.modules.Country.DTOs.CountryInsertDTO;
 import at.backend.tourist.places.core.Utils.Enum.Continent;
 import at.backend.tourist.places.modules.Country.Country;
 import at.backend.tourist.places.modules.Country.Repository.CountryRepository;
-import at.backend.tourist.places.core.Utils.Result;
+import at.backend.tourist.places.core.Utils.Response.Result;
 import at.backend.tourist.places.core.Utils.StringHandler;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;

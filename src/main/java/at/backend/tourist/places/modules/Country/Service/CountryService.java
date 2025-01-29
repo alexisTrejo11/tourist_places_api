@@ -4,7 +4,7 @@ import at.backend.tourist.places.modules.Country.DTOs.CountryDTO;
 import at.backend.tourist.places.modules.Country.DTOs.CountryInsertDTO;
 import at.backend.tourist.places.core.Service.CommonService;
 import at.backend.tourist.places.core.Utils.Enum.Continent;
-import at.backend.tourist.places.core.Utils.Result;
+import at.backend.tourist.places.core.Utils.Response.Result;
 
 import java.util.List;
 

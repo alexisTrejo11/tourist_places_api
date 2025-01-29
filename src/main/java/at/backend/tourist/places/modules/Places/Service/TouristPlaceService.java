@@ -4,8 +4,8 @@ import at.backend.tourist.places.modules.Places.DTOs.TouristPlaceDTO;
 import at.backend.tourist.places.modules.Places.DTOs.TouristPlaceInsertDTO;
 import at.backend.tourist.places.modules.Places.DTOs.TouristPlaceSearchDTO;
 import at.backend.tourist.places.core.Service.CommonService;
-import at.backend.tourist.places.core.Utils.PlaceRelationships;
-import at.backend.tourist.places.core.Utils.Result;
+import at.backend.tourist.places.modules.Places.Models.PlaceRelationships;
+import at.backend.tourist.places.core.Utils.Response.Result;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

@@ -1,6 +1,6 @@
 package at.backend.tourist.places.modules.Places.Controller;
 
-import at.backend.tourist.places.core.Utils.ResponseWrapper;
+import at.backend.tourist.places.core.Utils.Response.ResponseWrapper;
 import at.backend.tourist.places.modules.Places.DTOs.PlaceListDTO;
 import at.backend.tourist.places.modules.Places.Service.PlaceListService;
 import at.backend.tourist.places.core.SwaggerHelper.ApiResponseExamples;
@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,7 +26,7 @@ public class PlaceListController {
             description = "Retrieves a place list by its ID",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Successful retrieval of place list",
-                            content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.USER_FOUND))),
+                            content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.PLACE_LISTS))),
                     @ApiResponse(responseCode = "404", description = "Place list not found",
                             content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.NOT_FOUND)))
             }
@@ -44,7 +45,7 @@ public class PlaceListController {
             description = "Retrieves all available place lists",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Successful retrieval of place lists",
-                            content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.USER_FOUND))),
+                            content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.PLACE_LIST))),
                     @ApiResponse(responseCode = "404", description = "No place lists found",
                             content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.NOT_FOUND)))
             }
@@ -60,7 +61,7 @@ public class PlaceListController {
             description = "Retrieves place lists for a specific user by their ID",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Successful retrieval of place lists",
-                            content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.USER_FOUND))),
+                            content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.PLACE_LIST))),
                     @ApiResponse(responseCode = "404", description = "Place lists not found for the user",
                             content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.NOT_FOUND)))
             }
@@ -76,8 +77,9 @@ public class PlaceListController {
 
     @Operation(
             summary = "Delete place list by ID",
-            description = "Deletes a specific place list by its ID",
-            responses = {
+            description = "Deletes a specific place list by its ID **Requires ADMIN role**.",
+            security = @SecurityRequirement(name = "bearerAuth"),
+    responses = {
                     @ApiResponse(responseCode = "204", description = "Successful deletion of place list",
                             content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.NO_CONTENT))),
                     @ApiResponse(responseCode = "404", description = "Place list not found",

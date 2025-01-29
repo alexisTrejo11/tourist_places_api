@@ -1,4 +1,4 @@
-package at.backend.tourist.places.modules.Places;
+package at.backend.tourist.places.modules.Places.Models;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

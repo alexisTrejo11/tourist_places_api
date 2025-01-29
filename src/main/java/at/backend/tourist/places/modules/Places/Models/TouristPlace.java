@@ -1,4 +1,4 @@
-package at.backend.tourist.places.modules.Places;
+package at.backend.tourist.places.modules.Places.Models;
 
 import at.backend.tourist.places.modules.Activity.Model.Activity;
 import at.backend.tourist.places.modules.Country.Country;

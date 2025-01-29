@@ -5,16 +5,17 @@ import at.backend.tourist.places.core.Utils.SwaggerHelper.ApiConstants;
 import at.backend.tourist.places.core.Utils.SwaggerHelper.CommonActivityResponses;
 import at.backend.tourist.places.modules.Activity.DTOs.ActivityDTO;
 import at.backend.tourist.places.modules.Activity.DTOs.ActivityInsertDTO;
-import at.backend.tourist.places.modules.Places.TouristPlace;
+import at.backend.tourist.places.modules.Places.Models.TouristPlace;
 import at.backend.tourist.places.modules.Activity.Service.ActivityService;
-import at.backend.tourist.places.core.Utils.ResponseWrapper;
-import at.backend.tourist.places.core.Utils.Result;
+import at.backend.tourist.places.core.Utils.Response.ResponseWrapper;
+import at.backend.tourist.places.core.Utils.Response.Result;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -78,7 +79,11 @@ public class ActivityController {
         return ResponseEntity.ok(ResponseWrapper.found(activities, "Activities"));
     }
 
-    @Operation(summary = "Create a new activity", description = "Add a new activity to the system.")
+    @Operation(
+            summary = "Create a new activity",
+            description = "Add a new activity to the system. **Requires ADMIN role**.",
+            security = @SecurityRequirement(name = "bearerAuth")
+            )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = ApiConstants.ACTIVITY_CREATED, content = @Content(schema = @Schema(example =ApiResponseExamples.ACTIVITY_CREATED))),
             @ApiResponse(responseCode = "400", description = ApiConstants.INVALID_INPUT_DATA, content = @Content(schema = @Schema(example = ApiResponseExamples.BAD_REQUEST))),
@@ -98,7 +103,11 @@ public class ActivityController {
         return ResponseEntity.status(201).body(ResponseWrapper.created(createdActivity, "Activity"));
     }
 
-    @Operation(summary = "Delete an activity by ID", description = "Delete an activity from the system using its ID.")
+    @Operation(
+            summary = "Delete an activity by ID",
+            description = "Delete an activity from the system using its ID.  **Requires ADMIN role**.",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = ApiConstants.ACTIVITY_DELETED, content = @Content(schema = @Schema(example = ApiResponseExamples.SUCCESS))),
             @ApiResponse(responseCode = "404", description = ApiConstants.ACTIVITY_NOT_FOUND, content = @Content(schema = @Schema(example = ApiResponseExamples.NOT_FOUND))),

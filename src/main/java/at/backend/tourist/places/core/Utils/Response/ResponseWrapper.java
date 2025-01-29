@@ -1,4 +1,4 @@
-package at.backend.tourist.places.core.Utils;
+package at.backend.tourist.places.core.Utils.Response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;

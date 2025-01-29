@@ -2,7 +2,7 @@ package at.backend.tourist.places.modules.Places.AutoMappers;
 
 import at.backend.tourist.places.modules.Places.DTOs.TouristPlaceDTO;
 import at.backend.tourist.places.modules.Places.DTOs.TouristPlaceInsertDTO;
-import at.backend.tourist.places.modules.Places.TouristPlace;
+import at.backend.tourist.places.modules.Places.Models.TouristPlace;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

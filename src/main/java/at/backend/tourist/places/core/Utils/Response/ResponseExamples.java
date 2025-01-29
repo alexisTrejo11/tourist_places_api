@@ -1,4 +1,4 @@
-package at.backend.tourist.places.core.Utils;
+package at.backend.tourist.places.core.Utils.Response;
 
 import at.backend.tourist.places.core.SwaggerHelper.ExampleObject;
 import at.backend.tourist.places.modules.User.DTOs.UserDTO;
