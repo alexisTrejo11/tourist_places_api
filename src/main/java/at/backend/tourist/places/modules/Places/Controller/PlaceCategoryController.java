@@ -4,6 +4,7 @@ import at.backend.tourist.places.core.Utils.ResponseWrapper;
 import at.backend.tourist.places.modules.Places.DTOs.PlaceCategoryDTO;
 import at.backend.tourist.places.modules.Places.DTOs.PlaceCategoryInsertDTO;
 import at.backend.tourist.places.modules.Places.Service.PlaceCategoryService;
+import at.backend.tourist.places.core.SwaggerHelper.ApiResponseExamples;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -26,7 +27,9 @@ public class PlaceCategoryController {
             description = "Retrieves a list of all place categories available",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Successful retrieval of place categories",
-                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = PlaceCategoryDTO.class)))
+                            content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.USER_FOUND))),
+                    @ApiResponse(responseCode = "404", description = "Place categories not found",
+                            content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.NOT_FOUND)))
             }
     )
     @GetMapping
@@ -39,8 +42,9 @@ public class PlaceCategoryController {
             description = "Retrieves the details of a specific place category by its ID",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Successful retrieval of the place category",
-                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = PlaceCategoryDTO.class))),
-                    @ApiResponse(responseCode = "404", description = "Place category not found")
+                            content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.USER_FOUND))),
+                    @ApiResponse(responseCode = "404", description = "Place category not found",
+                            content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.NOT_FOUND)))
             }
     )
     @GetMapping("/{id}")
@@ -58,10 +62,13 @@ public class PlaceCategoryController {
             security = @SecurityRequirement(name = "bearerAuth"),
             responses = {
                     @ApiResponse(responseCode = "201", description = "Place category created successfully",
-                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = PlaceCategoryDTO.class))),
-                    @ApiResponse(responseCode = "400", description = "Invalid place category data"),
-                    @ApiResponse(responseCode = "401", description = "Unauthorized, user not authenticated"),
-                    @ApiResponse(responseCode = "403", description = "Forbidden, user lacks necessary permissions (admin role required)")
+                            content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.CREATED))),
+                    @ApiResponse(responseCode = "400", description = "Invalid place category data",
+                            content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.BAD_REQUEST))),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized, user not authenticated",
+                            content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.UNAUTHORIZED_ACCESS))),
+                    @ApiResponse(responseCode = "403", description = "Forbidden, user lacks necessary permissions (admin role required)",
+                            content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.FORBIDDEN)))
             }
     )
     @PostMapping
@@ -75,10 +82,14 @@ public class PlaceCategoryController {
             description = "Deletes a specific place category by its ID (admin role required)",
             security = @SecurityRequirement(name = "bearerAuth"),
             responses = {
-                    @ApiResponse(responseCode = "204", description = "Place category deleted successfully"),
-                    @ApiResponse(responseCode = "404", description = "Place category not found"),
-                    @ApiResponse(responseCode = "401", description = "Unauthorized, user not authenticated"),
-                    @ApiResponse(responseCode = "403", description = "Forbidden, user lacks necessary permissions (admin role required)")
+                    @ApiResponse(responseCode = "204", description = "Place category deleted successfully",
+                            content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.NO_CONTENT))),
+                    @ApiResponse(responseCode = "404", description = "Place category not found",
+                            content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.NOT_FOUND))),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized, user not authenticated",
+                            content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.UNAUTHORIZED_ACCESS))),
+                    @ApiResponse(responseCode = "403", description = "Forbidden, user lacks necessary permissions (admin role required)",
+                            content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.FORBIDDEN)))
             }
     )
     @DeleteMapping("/{id}")

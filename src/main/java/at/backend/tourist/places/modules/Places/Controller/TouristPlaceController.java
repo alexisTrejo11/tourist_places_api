@@ -7,6 +7,7 @@ import at.backend.tourist.places.modules.Places.DTOs.TouristPlaceSearchDTO;
 import at.backend.tourist.places.modules.Places.Service.TouristPlaceService;
 import at.backend.tourist.places.core.Utils.PlaceRelationships;
 import at.backend.tourist.places.core.Utils.Result;
+import at.backend.tourist.places.core.SwaggerHelper.ApiResponseExamples;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -35,7 +36,12 @@ public class TouristPlaceController {
     @Operation(summary = "Search tourist places", description = "Search for tourist places based on various criteria such as name, description, rating, country, category, etc.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Tourist places found"),
-            @ApiResponse(responseCode = "400", description = "Invalid input parameters")
+            @ApiResponse(responseCode = "400", description = "Invalid input parameters",
+                    content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.BAD_REQUEST))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, user not authenticated",
+                    content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.UNAUTHORIZED_ACCESS))),
+            @ApiResponse(responseCode = "403", description = "Forbidden, user lacks necessary permissions (admin role required)",
+                    content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.FORBIDDEN)))
     })
     @GetMapping("/search")
     public ResponseWrapper<Page<TouristPlaceDTO>> searchTouristPlaces(
@@ -56,7 +62,8 @@ public class TouristPlaceController {
     @Operation(summary = "Get a tourist place by ID", description = "Retrieve a tourist place by its unique identifier.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Tourist place found"),
-            @ApiResponse(responseCode = "404", description = "Tourist place not found")
+            @ApiResponse(responseCode = "404", description = "Tourist place not found",
+                    content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.NOT_FOUND)))
     })
     @GetMapping("/{id}")
     public ResponseWrapper<TouristPlaceDTO> getTouristPlaceById(
@@ -69,7 +76,7 @@ public class TouristPlaceController {
     @Operation(summary = "Get tourist places by country ID", description = "Retrieve a list of tourist places based on the country ID.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Tourist places retrieved successfully"),
-            @ApiResponse(responseCode = "404", description = "No tourist places found for the given country ID")
+            @ApiResponse(responseCode = "404", description = "No tourist places found for the given country ID", content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.NOT_FOUND)))
     })
     @GetMapping("/country/{countryId}")
     public ResponseWrapper<List<TouristPlaceDTO>> getByCountryId(
@@ -82,7 +89,7 @@ public class TouristPlaceController {
     @Operation(summary = "Get tourist places by category ID", description = "Retrieve a list of tourist places based on the category ID.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Tourist places retrieved successfully"),
-            @ApiResponse(responseCode = "404", description = "No tourist places found for the given category ID")
+            @ApiResponse(responseCode = "404", description = "No tourist places found for the given category ID", content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.NOT_FOUND)))
     })
     @GetMapping("/category/{categoryId}")
     public ResponseWrapper<List<TouristPlaceDTO>> getByCategoryId(
@@ -95,7 +102,12 @@ public class TouristPlaceController {
     @Operation(summary = "Create a new tourist place", description = "Create a new tourist place with the provided details.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Tourist place created successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid input or validation failed")
+            @ApiResponse(responseCode = "400", description = "Invalid input or validation failed",
+                    content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.BAD_REQUEST))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, user not authenticated",
+                    content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.UNAUTHORIZED_ACCESS))),
+            @ApiResponse(responseCode = "403", description = "Forbidden, user lacks necessary permissions (admin role required)",
+                    content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.FORBIDDEN)))
     })
     @PostMapping
     public ResponseWrapper<TouristPlaceDTO> createTouristPlace(
@@ -116,7 +128,12 @@ public class TouristPlaceController {
     @Operation(summary = "Delete a tourist place by ID", description = "Delete a tourist place from the system using its unique ID.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Tourist place deleted successfully"),
-            @ApiResponse(responseCode = "404", description = "Tourist place not found")
+            @ApiResponse(responseCode = "404", description = "Tourist place not found",
+                    content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.NOT_FOUND))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, user not authenticated",
+                    content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.UNAUTHORIZED_ACCESS))),
+            @ApiResponse(responseCode = "403", description = "Forbidden, user lacks necessary permissions (admin role required)",
+                    content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.FORBIDDEN)))
     })
     @DeleteMapping("/{id}")
     public ResponseWrapper<Void> deleteTouristPlace(

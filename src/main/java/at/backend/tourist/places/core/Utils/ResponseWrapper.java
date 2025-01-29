@@ -21,7 +21,7 @@ public class ResponseWrapper<T> {
     @JsonProperty("data")
     private T data;
 
-    @Schema(description = "Response message providing additional information", example = "User successfully created")
+    @Schema(description = "Response message providing additional information", example = "Entity successfully fetched")
     @JsonProperty("message")
     private String message;
 
