@@ -94,7 +94,6 @@ public class ReviewController {
     public ResponseEntity<ResponseWrapper<ReviewDTO>> createReview(
             @Valid @RequestBody ReviewInsertDTO insertDTO) {
 
-        Result<Void> validationResult = reviewService.validate(insertDTO);
         ReviewDTO createdReview = reviewService.create(insertDTO);
         touristPlaceService.updatePlaceRating(createdReview.getPlaceId());
         return ResponseEntity.status(HttpStatus.CREATED).body(ResponseWrapper.created(createdReview, "Review"));

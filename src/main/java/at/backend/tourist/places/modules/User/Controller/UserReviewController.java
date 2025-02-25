@@ -92,12 +92,6 @@ public class UserReviewController {
         String email = jwtService.getEmailFromRequest(request);
         insertDTO.setAuthorEmail(email);
 
-        Result<Void> validationResult = reviewService.validate(insertDTO);
-        if (!validationResult.isSuccess()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ResponseWrapper.badRequest(validationResult.getErrorMessage()));
-        }
-
         ReviewDTO createdReview = reviewService.create(insertDTO);
 
         touristPlaceService.updatePlaceRating(createdReview.getPlaceId());
@@ -127,12 +121,6 @@ public class UserReviewController {
     public ResponseEntity<ResponseWrapper<ReviewDTO>> updateMyReview(@Valid @RequestBody ReviewUpdateDTO updateDTO,
                                                                      HttpServletRequest request) {
         String email = jwtService.getEmailFromRequest(request);
-
-        Result<Void> validationResult = reviewService.validate(updateDTO, email);
-        if (!validationResult.isSuccess()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ResponseWrapper.badRequest(validationResult.getErrorMessage()));
-        }
 
         ReviewDTO createdReview = reviewService.update(updateDTO, email);
 
