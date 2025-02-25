@@ -1,5 +1,7 @@
 package at.backend.tourist.places.modules.Activity.Service;
 
+import at.backend.tourist.places.core.Exceptions.BusinessLogicException;
+import at.backend.tourist.places.core.Exceptions.ResourceNotFoundException;
 import at.backend.tourist.places.modules.Activity.AutoMappers.ActivityMapper;
 import at.backend.tourist.places.modules.Activity.DTOs.ActivityDTO;
 import at.backend.tourist.places.modules.Activity.DTOs.ActivityInsertDTO;
@@ -27,11 +29,9 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public ActivityDTO getById(Long id) {
-        Optional<Activity> optionalActivity = activityRepository.findById(id);
-        return optionalActivity
+        return activityRepository.findById(id)
                 .map(activityMapper::entityToDTO)
-                .orElse(null);
-
+                .orElseThrow(() -> new ResourceNotFoundException("Activity", "id", id));
     }
 
     @Override
@@ -45,41 +45,34 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public List<ActivityDTO> getByTouristPlace(Long id) {
-        boolean isPlaceExisting = touristPlaceRepository.existsById(id);
-        if (!isPlaceExisting) {
-            return null;
+        if (!touristPlaceRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Tourist place", "id", id);
         }
 
-        List<Activity> activities = activityRepository.findByTouristPlaceId(id);
-
-        return activities.stream()
+        return activityRepository.findByTouristPlaceId(id).stream()
                 .map(activityMapper::entityToDTO)
                 .toList();
     }
 
-    @Override
-    public Result<TouristPlace> validate(ActivityInsertDTO insertDTO) {
-        Optional<TouristPlace> touristPlace = touristPlaceRepository.findById(insertDTO.getTouristPlaceId());
-        if (touristPlace.isEmpty()) {
-            return Result.failure("tourist place not found");
-        }
+    private void validate(ActivityInsertDTO insertDTO) {
+        touristPlaceRepository.findById(insertDTO.getTouristPlaceId())
+                .orElseThrow(() -> new ResourceNotFoundException("Tourist place", "id", insertDTO.getTouristPlaceId()));
 
         if (insertDTO.getPrice() > 1000000 || insertDTO.getPrice() < 10) {
-            return Result.failure("price is out of range. Range accepted between 100 and 1000000");
+            throw new BusinessLogicException("Price must be between 10 and 1,000,000");
         }
-
-        return Result.success(touristPlace.get());
     }
 
     @Override
     public ActivityDTO create(ActivityInsertDTO insertDTO) {
-        log.info("Starting to create activity for tourist place: {}", insertDTO.getTouristPlace());
+        log.info("Starting to create activity for tourist place: {}", insertDTO.getTouristPlaceId());
+
+        validate(insertDTO);
 
         Activity activity = activityMapper.DTOToEntity(insertDTO);
-        activity.setTouristPlace(insertDTO.getTouristPlace());
+        activity.setTouristPlace(touristPlaceRepository.getReferenceById(insertDTO.getTouristPlaceId()));
 
         activityRepository.saveAndFlush(activity);
-
         log.info("Activity created successfully with ID: {}", activity.getId());
 
         return activityMapper.entityToDTO(activity);
@@ -89,13 +82,10 @@ public class ActivityServiceImpl implements ActivityService {
     public void delete(Long id) {
         log.info("Attempting to delete activity with ID: {}", id);
 
-        boolean exists = activityRepository.existsById(id);
-        if (!exists) {
-            log.error("Activity with ID: {} not found for deletion", id);
-            throw new EntityNotFoundException("Activity not found");
-        }
+        Activity activity = activityRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Activity", "id", id));
 
-        activityRepository.deleteById(id);
+        activityRepository.delete(activity);
         log.info("Activity with ID: {} deleted successfully", id);
     }
 }

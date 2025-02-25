@@ -1,5 +1,6 @@
 package at.backend.tourist.places.modules.User.Service;
 
+import at.backend.tourist.places.core.Exceptions.ResourceNotFoundException;
 import at.backend.tourist.places.modules.User.AutoMapper.UserMappers;
 import at.backend.tourist.places.modules.Auth.DTOs.SignupDTO;
 import at.backend.tourist.places.modules.User.DTOs.UserDTO;
@@ -32,7 +33,8 @@ public class UserServiceImpl implements UserService {
     public UserDTO getById(Long id) {
         Optional<User> user = userRepository.findById(id);
 
-        return user.map(userMappers::entityToDTO).orElse(null);
+        return user.map(userMappers::entityToDTO)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
     }
 
     @Override
@@ -44,7 +46,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO getByEmail(String email) {
         Optional<User> user = userRepository.findByEmail(email);
-        return user.map(userMappers::entityToDTO).orElse(new UserDTO());
+        return user.map(userMappers::entityToDTO)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
     }
 
     @Override
@@ -117,7 +120,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void updatePassword(String email, String newPassword) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
 
         String hashedPassword = PasswordHandler.hashPassword(newPassword);
         user.setPassword(hashedPassword);
@@ -128,7 +131,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void updateRole(Long id, Role role) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: Id " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
 
         user.setRole(role);
 
@@ -138,7 +141,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void activateUser(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
 
         user.setActivated(true);
 

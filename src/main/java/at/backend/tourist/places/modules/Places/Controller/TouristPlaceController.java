@@ -121,12 +121,6 @@ public class TouristPlaceController {
                     required = true, content = @Content(schema = @Schema(implementation = TouristPlaceInsertDTO.class)))
             TouristPlaceInsertDTO insertDTO) {
 
-        Result<PlaceRelationships> validationResult = placeService.validate(insertDTO);
-        if (!validationResult.isSuccess()) {
-            return ResponseWrapper.badRequest(validationResult.getErrorMessage());
-        }
-
-        insertDTO.setPlaceRelationships(validationResult.getData());
         TouristPlaceDTO createdTouristPlace = placeService.create(insertDTO);
         return ResponseWrapper.created(createdTouristPlace, "Tourist Place");
     }

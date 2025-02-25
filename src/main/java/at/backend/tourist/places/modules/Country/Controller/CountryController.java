@@ -6,7 +6,6 @@ import at.backend.tourist.places.modules.Country.DTOs.CountryInsertDTO;
 import at.backend.tourist.places.core.Utils.Enum.Continent;
 import at.backend.tourist.places.core.Utils.Response.ResponseWrapper;
 import at.backend.tourist.places.modules.Country.Service.CountryService;
-import at.backend.tourist.places.core.Utils.Response.Result;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -38,9 +37,6 @@ public class CountryController {
     public ResponseWrapper<CountryDTO> getCountryById(
             @Parameter(description = "ID of the country", example = "1") @PathVariable Long id) {
         CountryDTO country = countryService.getById(id);
-        if (country == null) {
-            return ResponseWrapper.notFound("Country");
-        }
         return ResponseWrapper.found(country, "Country");
     }
 
@@ -53,9 +49,6 @@ public class CountryController {
     public ResponseWrapper<CountryDTO> getCountryByName(
             @Parameter(description = "Name of the country", example = "Japan") @Valid @PathVariable String name) {
         CountryDTO country = countryService.getByName(name);
-        if (country == null) {
-            return ResponseWrapper.notFound("Country");
-        }
         return ResponseWrapper.found(country, "Country");
     }
 
@@ -100,10 +93,6 @@ public class CountryController {
     })
     @PostMapping
     public ResponseWrapper<CountryDTO> createCountry(@Valid @RequestBody CountryInsertDTO insertDTO) {
-        Result<Void> validationResult = countryService.validate(insertDTO);
-        if (!validationResult.isSuccess()) {
-            return ResponseWrapper.badRequest(validationResult.getErrorMessage());
-        }
         CountryDTO createdCountry = countryService.create(insertDTO);
         return ResponseWrapper.created(createdCountry, "Country");
     }
@@ -123,11 +112,8 @@ public class CountryController {
                     content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.FORBIDDEN)))
     })
     @DeleteMapping("/{id}")
-    public ResponseWrapper<Void> deleteCountry(
-            @Parameter(description = "ID of the country to delete", example = "1") @PathVariable Long id) {
-        if (countryService.getById(id) == null) {
-            return ResponseWrapper.notFound("Country");
-        }
+    public ResponseWrapper<Void> deleteCountry(@Parameter(description = "ID of the country to delete", example = "1")
+                                                   @PathVariable Long id) {
         countryService.delete(id);
         return ResponseWrapper.deleted("Country");
     }

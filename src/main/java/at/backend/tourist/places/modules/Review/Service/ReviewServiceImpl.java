@@ -1,5 +1,7 @@
 package at.backend.tourist.places.modules.Review.Service;
 
+import at.backend.tourist.places.core.Exceptions.BusinessLogicException;
+import at.backend.tourist.places.core.Exceptions.ResourceNotFoundException;
 import at.backend.tourist.places.modules.Review.AutoMappers.ReviewMapper;
 import at.backend.tourist.places.modules.Review.DTOs.ReviewDTO;
 import at.backend.tourist.places.modules.Review.DTOs.ReviewInsertDTO;
@@ -10,8 +12,6 @@ import at.backend.tourist.places.modules.Places.Models.TouristPlace;
 import at.backend.tourist.places.modules.User.Model.User;
 import at.backend.tourist.places.modules.Places.Repository.TouristPlaceRepository;
 import at.backend.tourist.places.modules.User.Repository.UserRepository;
-import at.backend.tourist.places.core.Utils.Response.Result;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -19,7 +19,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -33,11 +32,10 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public ReviewDTO getById(Long id) {
-        Optional<Review> optionalReview = reviewRepository.findById(id);
-        return optionalReview
-                .map(reviewMapper::entityToDTO)
-                .orElse(null);
+        Review review = reviewRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Review", "id", id));
 
+        return reviewMapper.entityToDTO(review);
     }
 
     @Override
@@ -51,9 +49,8 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public List<ReviewDTO> getByTouristPlace(Long touristPlaceId) {
-        boolean isPlaceExisting = touristPlaceRepository.existsById(touristPlaceId);
-        if (!isPlaceExisting) {
-            return null;
+        if (!touristPlaceRepository.existsById(touristPlaceId)) {
+            throw new ResourceNotFoundException("Tourist Place", "id", touristPlaceId);
         }
 
         List<Review> reviews = reviewRepository.findByPlaceId(touristPlaceId);
@@ -65,35 +62,32 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public Page<ReviewDTO> getReviewByEmail(String email, Pageable pageable) {
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
 
         Page<Review> reviewsPage = reviewRepository.findByAuthorId(user.getId(), pageable);
         return reviewsPage.map(reviewMapper::entityToDTO);
     }
 
-    @Override
-    public Result<Void> validate(ReviewInsertDTO insertDTO) {
-        if (insertDTO.getRating() < 0 ||insertDTO.getRating() > 10) {
-            return Result.failure("Rating out of range");
+    private void validate(ReviewInsertDTO insertDTO) {
+        if (insertDTO.getRating() < 0 || insertDTO.getRating() > 10) {
+            throw new BusinessLogicException("Rating must be between 0 and 10");
         }
-
-        return Result.success();
     }
 
-    @Override
-    public Result<Void> validate(ReviewUpdateDTO updateDTO, String userEmail) {
-        if (updateDTO.getRating() < 0 ||updateDTO.getRating() > 10) {
-            return Result.failure("Rating out of range");
+    private void validate(ReviewUpdateDTO updateDTO, String userEmail) {
+        if (updateDTO.getRating() < 0 || updateDTO.getRating() > 10) {
+            throw new BusinessLogicException("Rating must be between 0 and 10");
         }
 
         validateUserBelonging(updateDTO.getReviewId(), userEmail);
-
-        return Result.success();
     }
 
     @Override
     public ReviewDTO create(ReviewInsertDTO insertDTO) {
         log.info("Starting to create review for tourist place: {}", insertDTO.getPlaceId());
+
+        validate(insertDTO);
 
         Review review = reviewMapper.DTOToEntity(insertDTO);
         addRelationship(insertDTO, review);
@@ -105,10 +99,14 @@ public class ReviewServiceImpl implements ReviewService {
         return reviewMapper.entityToDTO(review);
     }
 
+    @Override
     public ReviewDTO update(ReviewUpdateDTO updateDTO, String email) {
         log.info("Starting to update review for tourist place: {}", updateDTO.getReviewId());
+
+        validate(updateDTO, email);
+
         Review review = reviewRepository.findById(updateDTO.getReviewId())
-                .orElseThrow(() -> new EntityNotFoundException("Review not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Review", "id", updateDTO.getReviewId()));
 
         reviewMapper.update(review, updateDTO);
 
@@ -123,10 +121,9 @@ public class ReviewServiceImpl implements ReviewService {
     public void delete(Long id) {
         log.info("Attempting to delete review with ID: {}", id);
 
-        boolean exists = reviewRepository.existsById(id);
-        if (!exists) {
+        if (!reviewRepository.existsById(id)) {
             log.error("Review with ID: {} not found for deletion", id);
-            throw new EntityNotFoundException("Review not found");
+            throw new ResourceNotFoundException("Review", "id", id);
         }
 
         reviewRepository.deleteById(id);
@@ -150,27 +147,25 @@ public class ReviewServiceImpl implements ReviewService {
 
     private User getAuthor(String authorEmail) {
         if (authorEmail == null) {
-            throw new RuntimeException("Author not provided");
+            throw new BusinessLogicException("Author email must be provided");
         }
 
         return userRepository.findByEmail(authorEmail)
-                .orElseThrow(() -> new EntityNotFoundException("Email not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", authorEmail));
     }
 
     private TouristPlace getPlace(Long placeId) {
         return touristPlaceRepository.findById(placeId)
-                .orElseThrow(() -> new EntityNotFoundException("Place not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Tourist Place", "id", placeId));
     }
 
     private void validateUserBelonging(Long reviewId, String userEmail) {
         User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", userEmail));
 
-        // Check if user make the request comment
-        Optional<Review> review = reviewRepository.findByIdAndAuthorId(reviewId, user.getId());
-        if (review.isEmpty()) {
-            throw new EntityNotFoundException("Review not found");
+        boolean isUserReview = reviewRepository.findByIdAndAuthorId(reviewId, user.getId()).isPresent();
+        if (!isUserReview) {
+            throw new BusinessLogicException("User is not authorized to modify this review");
         }
     }
-
 }

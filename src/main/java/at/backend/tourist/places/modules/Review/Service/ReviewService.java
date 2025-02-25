@@ -14,9 +14,6 @@ public interface ReviewService extends CommonService<ReviewDTO, ReviewInsertDTO>
     List<ReviewDTO> getByTouristPlace(Long touristPlaceId);
     Page<ReviewDTO> getReviewByEmail(String email, Pageable pageable);
 
-    Result<Void> validate(ReviewInsertDTO insertDTO);
-    Result<Void> validate(ReviewUpdateDTO updateDTO, String userEmail);
-
     ReviewDTO update(ReviewUpdateDTO updateDTO, String email);
     void delete(Long id, String email);
 

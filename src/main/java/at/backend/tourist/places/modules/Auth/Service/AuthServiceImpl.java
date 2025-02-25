@@ -1,5 +1,9 @@
 package at.backend.tourist.places.modules.Auth.Service;
 
+import at.backend.tourist.places.core.Exceptions.BadRequestException;
+import at.backend.tourist.places.core.Exceptions.BusinessLogicException;
+import at.backend.tourist.places.core.Exceptions.ResourceAlreadyExistsException;
+import at.backend.tourist.places.core.Exceptions.ResourceNotFoundException;
 import at.backend.tourist.places.modules.User.AutoMapper.UserMappers;
 import at.backend.tourist.places.modules.Auth.DTOs.LoginDTO;
 import at.backend.tourist.places.modules.Auth.DTOs.LoginResponseDTO;
@@ -12,12 +16,10 @@ import at.backend.tourist.places.core.Service.SendingService;
 import at.backend.tourist.places.core.Utils.DTOs.EmailSendingDTO;
 import at.backend.tourist.places.modules.Auth.JWT.JwtService;
 import at.backend.tourist.places.core.Utils.User.PasswordHandler;
-import at.backend.tourist.places.core.Utils.Response.Result;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Service
@@ -31,41 +33,33 @@ public class AuthServiceImpl implements AuthService {
     private final RedisTokenService redisTokenService;
 
     @Override
-    public Result<Void> validateSignup(SignupDTO signupDTO) {
-        Optional<User> user = userRepository.findByEmail(signupDTO.getEmail());
-        if (user.isPresent()) {
-            return Result.failure("Email already taken");
-        }
+    public void validateSignup(SignupDTO signupDTO) {
+        userRepository.findByEmail(signupDTO.getEmail())
+                .ifPresent(user -> {
+                    throw new ResourceAlreadyExistsException("User", "email", signupDTO.getEmail());
+                });
 
-        Result<Void> passwordValidation = validatePasswordFormat(signupDTO.getPassword());
-        if (!passwordValidation.isSuccess()) {
-            return passwordValidation;
-        }
-
-        return Result.success();
+        validatePasswordFormat(signupDTO.getPassword());
     }
+
 
     @Override
-    public Result<UserDTO> validateLogin(LoginDTO loginDTO) {
+    public UserDTO validateLogin(LoginDTO loginDTO) {
+        User user = userRepository.findByEmail(loginDTO.getEmail())
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", loginDTO.getEmail()));
 
-        Optional<User> optionalUser = userRepository.findByEmail(loginDTO.getEmail());
-        if (optionalUser.isEmpty()) {
-            return Result.failure("User not found with given credentials");
+        if (!user.isActivated()) {
+            throw new BusinessLogicException("User not activated");
         }
 
-        User user = optionalUser.get();
-            if (!user.isActivated()) {
-               return Result.failure("User not activated");
-            }
+        boolean isPasswordValid = PasswordHandler.validatePassword(loginDTO.getPassword(), user.getPassword());
+        if (!isPasswordValid) {
+            throw new BadRequestException("Invalid password");
+        }
 
-            boolean isPasswordValid = PasswordHandler.validatePassword(loginDTO.getPassword(), user.getPassword());
-            if (!isPasswordValid) {
-                return Result.failure("Wrong password");
-            }
-
-            UserDTO userDTO = userMappers.entityToDTO(user);
-            return Result.success(userDTO);
+        return userMappers.entityToDTO(user);
     }
+
 
     @Override
     @Async("taskExecutor")
@@ -112,16 +106,12 @@ public class AuthServiceImpl implements AuthService {
         return jwtService.validateToken(token);
     }
 
-    @Override
-    public Result<Void> validatePasswordFormat(String requestPassword) {
+    private void validatePasswordFormat(String password) {
         String passwordPattern = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&.\\-])[A-Za-z\\d@$!%*?&.\\-]{8,}$";
         Pattern pattern = Pattern.compile(passwordPattern);
 
-        if (requestPassword == null || !pattern.matcher(requestPassword).matches()) {
-            return Result.failure("Password must be at least 8 characters long, include an uppercase letter, "
-                    + "a lowercase letter, a number, and a special character. (@, $, !, %, *, ?, &, ., -)");
+        if (password == null || !pattern.matcher(password).matches()) {
+            throw new BusinessLogicException("Password must be at least 8 characters long, include an uppercase letter, a lowercase letter, a number, and a special character. (@, $, !, %, *, ?, &, ., -)");
         }
-
-        return Result.success();
     }
 }

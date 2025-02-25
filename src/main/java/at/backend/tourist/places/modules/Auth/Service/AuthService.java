@@ -7,9 +7,8 @@ import at.backend.tourist.places.modules.User.DTOs.UserDTO;
 import at.backend.tourist.places.core.Utils.Response.Result;
 
 public interface AuthService {
-    Result<Void> validateSignup(SignupDTO signupDTO);
-    Result<UserDTO> validateLogin(LoginDTO signupDTO);
-    Result<Void> validatePasswordFormat(String requestPassword);
+    void validateSignup(SignupDTO signupDTO);
+   UserDTO validateLogin(LoginDTO signupDTO);
 
     void processSignup(UserDTO signupDTO);
     LoginResponseDTO processLogin(UserDTO loginDTO);

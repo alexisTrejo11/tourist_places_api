@@ -1,5 +1,7 @@
 package at.backend.tourist.places.modules.Places.Service;
 
+import at.backend.tourist.places.core.Exceptions.BusinessLogicException;
+import at.backend.tourist.places.core.Exceptions.ResourceNotFoundException;
 import at.backend.tourist.places.modules.Places.AutoMappers.TouristPlaceMapper;
 import at.backend.tourist.places.modules.Places.DTOs.TouristPlaceDTO;
 import at.backend.tourist.places.modules.Places.DTOs.TouristPlaceInsertDTO;
@@ -12,8 +14,6 @@ import at.backend.tourist.places.modules.Review.Review;
 import at.backend.tourist.places.modules.Places.Models.TouristPlace;
 import at.backend.tourist.places.modules.Country.Repository.CountryRepository;
 import at.backend.tourist.places.modules.Places.Models.PlaceRelationships;
-import at.backend.tourist.places.core.Utils.Response.Result;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -23,7 +23,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -40,21 +39,22 @@ public class TouristPlaceServiceImpl implements TouristPlaceService {
 
     @Override
     public TouristPlaceDTO getById(Long id) {
-        Optional<TouristPlace> optionalTouristPlace = touristPlaceRepository.findById(id);
-        return optionalTouristPlace
-                .map(touristPlaceMapper::entityToDTO)
-                .orElse(null);
+        TouristPlace touristPlace = touristPlaceRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Tourist Place", "id", id));
+
+        return touristPlaceMapper.entityToDTO(touristPlace);
     }
 
     @Override
     public List<TouristPlaceDTO> getAll() {
-        List<TouristPlace> activities =  touristPlaceRepository.findAll();
+        List<TouristPlace> activities = touristPlaceRepository.findAll();
 
         return activities.stream()
                 .map(touristPlaceMapper::entityToDTO)
                 .toList();
     }
 
+    @Override
     public Page<TouristPlaceDTO> searchTouristPlaces(TouristPlaceSearchDTO searchDTO, Pageable pageable) {
         Specification<TouristPlace> spec = TouristPlaceSpecification.combineSpecifications(
                 TouristPlaceSpecification.hasName(searchDTO.getName()),
@@ -73,6 +73,10 @@ public class TouristPlaceServiceImpl implements TouristPlaceService {
 
     @Override
     public List<TouristPlaceDTO> getByIdList(Set<Long> idsList) {
+        if (idsList == null || idsList.isEmpty()) {
+            throw new BusinessLogicException("ID list cannot be empty");
+        }
+
         Set<TouristPlace> touristPlaces = touristPlaceRepository.findByIdIn(idsList);
 
         Set<Long> foundIds = touristPlaces.stream()
@@ -84,7 +88,7 @@ public class TouristPlaceServiceImpl implements TouristPlaceService {
                 .toList();
 
         if (!missingIds.isEmpty()) {
-            throw new EntityNotFoundException("Not found IDs for places: " + missingIds);
+            throw new ResourceNotFoundException("Tourist Places not found with IDs: " + missingIds);
         }
 
         return touristPlaces.stream()
@@ -92,13 +96,10 @@ public class TouristPlaceServiceImpl implements TouristPlaceService {
                 .toList();
     }
 
-
-
     @Override
     public List<TouristPlaceDTO> getByCountry(Long countryId) {
-        boolean isCountryExisting = countryRepository.existsById(countryId);
-        if (!isCountryExisting) {
-            return null;
+        if (!countryRepository.existsById(countryId)) {
+            throw new ResourceNotFoundException("Country", "id", countryId);
         }
 
         List<TouristPlace> places = touristPlaceRepository.findByCountryId(countryId);
@@ -110,9 +111,8 @@ public class TouristPlaceServiceImpl implements TouristPlaceService {
 
     @Override
     public List<TouristPlaceDTO> getByCategory(Long categoryId) {
-        boolean isCategoryExisting = placeCategoryRepository.existsById(categoryId);
-        if (!isCategoryExisting) {
-            return null;
+        if (!placeCategoryRepository.existsById(categoryId)) {
+            throw new ResourceNotFoundException("Place Category", "id", categoryId);
         }
 
         List<TouristPlace> places = touristPlaceRepository.findByCategoryId(categoryId);
@@ -122,28 +122,34 @@ public class TouristPlaceServiceImpl implements TouristPlaceService {
                 .toList();
     }
 
-    @Override
-    public Result<PlaceRelationships> validate(TouristPlaceInsertDTO insertDTO) {
-        Optional<Country> country = countryRepository.findById(insertDTO.getCountryId());
-        Optional<PlaceCategory> placeCategory = placeCategoryRepository.findById(insertDTO.getCategoryId());
-
-        if (country.isEmpty()) {
-            return Result.failure("Country not found");
-        } else if (placeCategory.isEmpty()) {
-            return Result.failure("Place category not found");
+    private PlaceRelationships validate(TouristPlaceInsertDTO insertDTO) {
+        if (insertDTO == null) {
+            throw new BusinessLogicException("Tourist place data cannot be null");
         }
 
-        PlaceRelationships placeRelationships =  new PlaceRelationships(country.get(), placeCategory.get());
-        return Result.success(placeRelationships);
+        if (insertDTO.getName() == null || insertDTO.getName().trim().isEmpty()) {
+            throw new BusinessLogicException("Tourist place name cannot be empty");
+        }
+
+        Country country = countryRepository.findById(insertDTO.getCountryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Country", "id", insertDTO.getCountryId()));
+
+        PlaceCategory placeCategory = placeCategoryRepository.findById(insertDTO.getCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Place Category", "id", insertDTO.getCategoryId()));
+
+        return new PlaceRelationships(country, placeCategory);
     }
 
     @Override
     public TouristPlaceDTO create(TouristPlaceInsertDTO insertDTO) {
         log.info("Starting to create tourist place with name: {}", insertDTO.getName());
 
+        PlaceRelationships relationships = validate(insertDTO);
+        insertDTO.setPlaceRelationships(relationships);
+
         TouristPlace place = touristPlaceMapper.DTOToEntity(insertDTO);
-        place.setCountry(insertDTO.getPlaceRelationships().getCountry());
-        place.setCategory(insertDTO.getPlaceRelationships().getPlaceCategory());
+        place.setCountry(relationships.getCountry());
+        place.setCategory(relationships.getPlaceCategory());
 
         touristPlaceRepository.saveAndFlush(place);
 
@@ -160,7 +166,7 @@ public class TouristPlaceServiceImpl implements TouristPlaceService {
         TouristPlace touristPlace = touristPlaceRepository.findByIdWithReviews(id)
                 .orElseThrow(() -> {
                     log.error("Tourist place with ID: {} not found for rating update", id);
-                    return new EntityNotFoundException("Tourist place not found");
+                    return new ResourceNotFoundException("Tourist Place", "id", id);
                 });
 
         double averageRating = calculateRatingAverage(touristPlace);
@@ -175,10 +181,9 @@ public class TouristPlaceServiceImpl implements TouristPlaceService {
     public void delete(Long id) {
         log.info("Attempting to delete tourist place with ID: {}", id);
 
-        boolean exists = touristPlaceRepository.existsById(id);
-        if (!exists) {
+        if (!touristPlaceRepository.existsById(id)) {
             log.error("Tourist place with ID: {} not found for deletion", id);
-            throw new EntityNotFoundException("TouristPlace not found");
+            throw new ResourceNotFoundException("Tourist Place", "id", id);
         }
 
         touristPlaceRepository.deleteById(id);
@@ -192,7 +197,7 @@ public class TouristPlaceServiceImpl implements TouristPlaceService {
                 .average()
                 .orElse(0.0);
 
-        // Round in one decimal
+        // Round to one decimal place
         averageRating = Math.round(averageRating * 10.0) / 10.0;
 
         log.debug("Calculated average rating for tourist place: {}", averageRating);

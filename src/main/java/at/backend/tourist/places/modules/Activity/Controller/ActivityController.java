@@ -5,10 +5,8 @@ import at.backend.tourist.places.core.Utils.SwaggerHelper.ApiConstants;
 import at.backend.tourist.places.core.Utils.SwaggerHelper.CommonActivityResponses;
 import at.backend.tourist.places.modules.Activity.DTOs.ActivityDTO;
 import at.backend.tourist.places.modules.Activity.DTOs.ActivityInsertDTO;
-import at.backend.tourist.places.modules.Places.Models.TouristPlace;
 import at.backend.tourist.places.modules.Activity.Service.ActivityService;
 import at.backend.tourist.places.core.Utils.Response.ResponseWrapper;
-import at.backend.tourist.places.core.Utils.Response.Result;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -37,9 +35,6 @@ public class ActivityController {
     @GetMapping
     public ResponseEntity<ResponseWrapper<List<ActivityDTO>>> getAllActivities() {
         List<ActivityDTO> activities = activityService.getAll();
-        if (activities.isEmpty()) {
-            return ResponseEntity.status(404).body(ResponseWrapper.notFound("Activities"));
-        }
 
         return ResponseEntity.ok(ResponseWrapper.found(activities, "Activities"));
     }
@@ -55,9 +50,6 @@ public class ActivityController {
     public ResponseEntity<ResponseWrapper<ActivityDTO>> getActivityById(
             @Parameter(description = "ID of the activity to retrieve", example = "1") @PathVariable Long id) {
         ActivityDTO activity = activityService.getById(id);
-        if (activity == null) {
-            return ResponseEntity.status(404).body(ResponseWrapper.notFound("Activity"));
-        }
 
         return ResponseEntity.ok(ResponseWrapper.found(activity, "Activity"));
     }
@@ -72,9 +64,6 @@ public class ActivityController {
     public ResponseEntity<ResponseWrapper<List<ActivityDTO>>> getByTouristPlaceId(
             @Parameter(description = "ID of the tourist place", example = "101") @PathVariable Long place_id) {
         List<ActivityDTO> activities = activityService.getByTouristPlace(place_id);
-        if (activities == null || activities.isEmpty()) {
-            return ResponseEntity.status(404).body(ResponseWrapper.notFound("Activities"));
-        }
 
         return ResponseEntity.ok(ResponseWrapper.found(activities, "Activities"));
     }
@@ -92,12 +81,6 @@ public class ActivityController {
     @PostMapping
     public ResponseEntity<ResponseWrapper<ActivityDTO>> createActivity(
             @Parameter(description = "Details of the activity to create") @RequestBody ActivityInsertDTO insertDTO) {
-        Result<TouristPlace> validationResult = activityService.validate(insertDTO);
-        if (!validationResult.isSuccess()) {
-            return ResponseEntity.status(400).body(ResponseWrapper.badRequest(validationResult.getErrorMessage()));
-        }
-
-        insertDTO.setTouristPlace(validationResult.getData());
         ActivityDTO createdActivity = activityService.create(insertDTO);
 
         return ResponseEntity.status(201).body(ResponseWrapper.created(createdActivity, "Activity"));
@@ -116,9 +99,6 @@ public class ActivityController {
     @DeleteMapping("/{id}")
     public ResponseEntity<ResponseWrapper<Void>> deleteActivity(
             @Parameter(description = "ID of the activity to delete", example = "1") @PathVariable Long id) {
-        if (activityService.getById(id) == null) {
-            return ResponseEntity.status(404).body(ResponseWrapper.notFound("Activity"));
-        }
 
         activityService.delete(id);
         return ResponseEntity.status(204).body(ResponseWrapper.deleted("Activity"));

@@ -12,6 +12,4 @@ public interface CountryService extends CommonService<CountryDTO, CountryInsertD
     List<CountryDTO> getByContinent(Continent continent);
     CountryDTO getByName(String name);
 
-    Result<Void> validate(CountryInsertDTO insertDTO);
-
     }

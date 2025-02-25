@@ -51,10 +51,7 @@ public class AuthController {
     })
     @PostMapping("/signup")
     public ResponseWrapper<String> signup(@Valid @RequestBody SignupDTO signupDTO) {
-        Result<Void> validateSignup = authService.validateSignup(signupDTO);
-        if (!validateSignup.isSuccess()) {
-            return ResponseWrapper.badRequest(validateSignup.getErrorMessage());
-        }
+        authService.validateSignup(signupDTO);
 
         UserDTO userDTO = userService.create(signupDTO);
         authService.processSignup(userDTO);
@@ -74,12 +71,9 @@ public class AuthController {
     })
     @PostMapping("/login")
     public ResponseWrapper<LoginResponseDTO> login(@Valid @RequestBody LoginDTO loginDTO) {
-        Result<UserDTO> validateLogin = authService.validateLogin(loginDTO);
-        if (!validateLogin.isSuccess()) {
-            return ResponseWrapper.badRequest(validateLogin.getErrorMessage());
-        }
+        UserDTO validateLogin = authService.validateLogin(loginDTO);
 
-        LoginResponseDTO responseDTO = authService.processLogin(validateLogin.getData());
+        LoginResponseDTO responseDTO = authService.processLogin(validateLogin);
         return ResponseWrapper.ok(responseDTO, "User", "Login");
     }
 

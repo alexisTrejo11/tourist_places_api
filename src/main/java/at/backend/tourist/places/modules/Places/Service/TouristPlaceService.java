@@ -17,7 +17,6 @@ public interface TouristPlaceService extends CommonService<TouristPlaceDTO, Tour
     List<TouristPlaceDTO> getByCountry(Long countryId);
     List<TouristPlaceDTO> getByCategory(Long categoryId);
     List<TouristPlaceDTO> getByIdList(Set<Long> idsList);
-    Result<PlaceRelationships> validate(TouristPlaceInsertDTO insertDTO);
 
     void updatePlaceRating(Long id);
 }

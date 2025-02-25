@@ -10,6 +10,6 @@ import java.util.List;
 
 public interface ActivityService extends CommonService<ActivityDTO, ActivityInsertDTO> {
     List<ActivityDTO> getByTouristPlace(Long touristPlaceId);
-    Result<TouristPlace> validate(ActivityInsertDTO insertDTO);
+
 }
 
