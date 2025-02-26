@@ -2,10 +2,14 @@ package at.backend.tourist.places.modules.Places.DTOs;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@AllArgsConstructor
 @Schema(description = "Data Transfer Object for place category")
+@NoArgsConstructor
 public class PlaceCategoryDTO {
 
     @JsonProperty("id")

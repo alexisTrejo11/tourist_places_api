@@ -21,6 +21,10 @@ repositories {
 	mavenCentral()
 }
 
+test {
+	jvmArgs '-Dnet.bytebuddy.experimental=true'
+}
+
 dependencies {
 	// Spring Boot Starters
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -62,12 +66,15 @@ dependencies {
 	// Security
 	implementation 'org.springframework.security:spring-security-oauth2-jose'
 
-	// Test
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
 	// Flyway Migrations
 	implementation 'org.flywaydb:flyway-core:9.22.0'
+
+	// Testing
+	testImplementation 'com.h2database:h2'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.mockito:mockito-inline:5.2.0'
+	testImplementation 'org.junit.jupiter:junit-jupiter:5.9.2'
+	testImplementation 'net.bytebuddy:byte-buddy:1.12.22'
 }
 
 tasks.named('test') {

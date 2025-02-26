@@ -69,9 +69,7 @@ public class PlaceListController {
     @GetMapping("/user/{userId}")
     public ResponseWrapper<List<PlaceListDTO>> getByUserId(@PathVariable Long userId) {
         List<PlaceListDTO> placeLists = placeListService.getByUserId(userId);
-        if (placeLists.isEmpty()) {
-            return ResponseWrapper.notFound("Place Lists for User ID: " + userId);
-        }
+
         return ResponseWrapper.found(placeLists, "Place Lists");
     }
 

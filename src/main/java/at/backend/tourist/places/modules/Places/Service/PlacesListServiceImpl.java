@@ -1,5 +1,7 @@
 package at.backend.tourist.places.modules.Places.Service;
 
+import at.backend.tourist.places.core.Exceptions.BusinessLogicException;
+import at.backend.tourist.places.core.Exceptions.ResourceNotFoundException;
 import at.backend.tourist.places.modules.Places.AutoMappers.PlaceListMapper;
 import at.backend.tourist.places.modules.Places.DTOs.PlaceListDTO;
 import at.backend.tourist.places.modules.Places.DTOs.PlaceListInsertDTO;
@@ -34,8 +36,7 @@ public class PlacesListServiceImpl implements PlaceListService {
         Optional<PlaceList> optionalPlaceList = placeListRepository.findById(id);
         return optionalPlaceList
                 .map(listMapper::entityToDTO)
-                .orElse(null);
-
+                .orElseThrow(() -> new ResourceNotFoundException("Place List", "id", id));
     }
 
     @Override
@@ -62,6 +63,8 @@ public class PlacesListServiceImpl implements PlaceListService {
     public PlaceListDTO create(PlaceListInsertDTO insertDTO) {
         PlaceList placeList = listMapper.DTOToEntity(insertDTO);
 
+        validate(insertDTO);
+
         placeList.setPlaces(getPlaces(insertDTO.getPlacesIds()));
         placeList.setUser(getUser(insertDTO.getUserId()));
 
@@ -74,7 +77,7 @@ public class PlacesListServiceImpl implements PlaceListService {
     @Transactional
     public PlaceListDTO addPlaces(Long placeListId, Set<Long> placeIds) {
         PlaceList placeList = placeListRepository.findById(placeListId)
-                .orElseThrow(() -> new EntityNotFoundException("PlaceList not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Place Category", "id", placeListId));
 
         Set<TouristPlace> placesToAdd = getPlaces(placeIds);
 
@@ -89,7 +92,7 @@ public class PlacesListServiceImpl implements PlaceListService {
     public void delete(Long id, Long userId) {
         Optional<PlaceList> placeList = placeListRepository.findByIdAndUserId(id, userId);
         if (placeList.isEmpty()) {
-            throw new EntityNotFoundException("List not found");
+            throw new ResourceNotFoundException("Place Category", "id", id);
         }
 
         placeListRepository.deleteById(id);
@@ -99,7 +102,7 @@ public class PlacesListServiceImpl implements PlaceListService {
     @Transactional
     public PlaceListDTO removePlaces(Long placeListId, Set<Long> placeIds) {
         PlaceList placeList = placeListRepository.findById(placeListId)
-                .orElseThrow(() -> new EntityNotFoundException("PlaceList not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Place List", "id", placeListId));
 
         List<TouristPlace> placesToRemove = placeList.getPlaces().stream()
                 .filter(place -> placeIds.contains(place.getId()))
@@ -117,26 +120,25 @@ public class PlacesListServiceImpl implements PlaceListService {
     public void delete(Long id) {
         boolean exists = placeListRepository.existsById(id);
         if (!exists) {
-            throw new EntityNotFoundException("PlaceList not found");
+            throw new ResourceNotFoundException("Place List", "id", id);
         }
 
         placeListRepository.deleteById(id);
     }
 
 
-    public Result<Void> validate(PlaceListInsertDTO insertDTO, String email) {
+    public void validate(PlaceListInsertDTO insertDTO) {
         int incomingIds = insertDTO.getPlacesIds().size();
         if (incomingIds >= 100) {
-            return Result.failure("Max limit of places reached. Limit = 100");
+            throw new BusinessLogicException("Max limit of places reached. Limit = 100");
         }
 
-        User user = userRepository.findByEmail(email).orElseThrow( () -> new EntityNotFoundException("User not Found"));
+        User user = userRepository.findById(insertDTO.getUserId()).orElseThrow( () -> new ResourceNotFoundException("User", "id", insertDTO.getUserId()));
         int listCount = placeListRepository.findByUserId(user.getId()).size();
         if (listCount > 10) {
-            return Result.failure("Max number of lists reached. Limit = 10");
+            throw new BusinessLogicException("Max number of lists reached. Limit = 10");
         }
 
-        return Result.success();
     }
 
     private Set<TouristPlace> getPlaces(Set<Long> idsList) {
@@ -151,13 +153,13 @@ public class PlacesListServiceImpl implements PlaceListService {
                 .toList();
 
         if (!missingIds.isEmpty()) {
-            throw new EntityNotFoundException("Not found IDs for places: " + missingIds);
+            throw new ResourceNotFoundException("Not found IDs for places: " + missingIds);
         }
 
         return touristPlaces;
     }
 
     private User getUser(Long userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        return userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
     }
 }

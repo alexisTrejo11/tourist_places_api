@@ -50,13 +50,15 @@ public class AuthController {
                             schema = @Schema(example = ApiResponseExamples.CONFLICT)))
     })
     @PostMapping("/signup")
-    public ResponseWrapper<String> signup(@Valid @RequestBody SignupDTO signupDTO) {
+    public ResponseEntity<ResponseWrapper<String>> signup(@Valid @RequestBody SignupDTO signupDTO) {
         authService.validateSignup(signupDTO);
 
         UserDTO userDTO = userService.create(signupDTO);
         authService.processSignup(userDTO);
 
-        return ResponseWrapper.created("An Email will be sent to the email provided. Use that token to activate your account.");
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ResponseWrapper.success("An Email will be sent to the email provided. " +
+                        "Use that token to activate your account."));
     }
 
     @Operation(summary = "Login user", description = "Authenticates a user and returns login details.")

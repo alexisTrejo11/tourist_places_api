@@ -15,6 +15,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -92,9 +94,9 @@ public class CountryController {
                     content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.FORBIDDEN)))
     })
     @PostMapping
-    public ResponseWrapper<CountryDTO> createCountry(@Valid @RequestBody CountryInsertDTO insertDTO) {
+    public ResponseEntity<ResponseWrapper<CountryDTO>> createCountry(@Valid @RequestBody CountryInsertDTO insertDTO) {
         CountryDTO createdCountry = countryService.create(insertDTO);
-        return ResponseWrapper.created(createdCountry, "Country");
+        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseWrapper.created(createdCountry, "Country"));
     }
 
     @Operation(
@@ -112,9 +114,9 @@ public class CountryController {
                     content = @Content(mediaType = "application/json", schema = @Schema(example = ApiResponseExamples.FORBIDDEN)))
     })
     @DeleteMapping("/{id}")
-    public ResponseWrapper<Void> deleteCountry(@Parameter(description = "ID of the country to delete", example = "1")
+    public ResponseEntity<ResponseWrapper<Void>> deleteCountry(@Parameter(description = "ID of the country to delete", example = "1")
                                                    @PathVariable Long id) {
         countryService.delete(id);
-        return ResponseWrapper.deleted("Country");
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ResponseWrapper.deleted("Country"));
     }
 }

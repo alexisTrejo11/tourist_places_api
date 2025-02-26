@@ -12,7 +12,6 @@ import java.util.List;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 @Entity
 @Table(name = "countries")
 public class Country {
@@ -53,6 +52,19 @@ public class Country {
 
     @OneToMany(mappedBy = "country")
     private List<TouristPlace> places;
+
+    public Country(Long id, String name, String capital, String currency, String language,
+                   Long population, Double area, Continent continent, String flagImage) {
+        this.id = id;
+        this.name = name;
+        this.capital = capital;
+        this.currency = currency;
+        this.language = language;
+        this.population = population;
+        this.area = area;
+        this.continent = continent;
+        this.flagImage = flagImage;
+    }
 
     @PrePersist
     protected void onCreate() {

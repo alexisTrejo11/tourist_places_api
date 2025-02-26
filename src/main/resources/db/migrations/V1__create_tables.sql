@@ -107,7 +107,9 @@ ALTER TABLE activities
     ADD CONSTRAINT fk_place_id FOREIGN KEY (place_id) REFERENCES tourist_places(id) ON DELETE CASCADE;
 
 ALTER TABLE tourist_places
-    ADD CONSTRAINT fk_country_id FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE SET NULL,
+    ADD CONSTRAINT fk_country_id FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE SET NULL;
+
+ALTER TABLE tourist_places
     ADD CONSTRAINT fk_category_id FOREIGN KEY (category_id) REFERENCES place_categories(id) ON DELETE CASCADE;
 
 ALTER TABLE reviews

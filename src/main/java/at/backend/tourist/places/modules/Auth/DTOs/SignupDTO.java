@@ -18,11 +18,11 @@ public class SignupDTO {
     @Size(max = 50, message = "name must not exceed 50 characters.")
     private String name;
 
-    @NotNull(message = "Password is required.")
-    @Size(min = 6, max = 50, message = "Password must be between 6 and 50 characters.")
-    private String password;
-
     @NotBlank(message = "Email is required.")
     @Email(message = "Email must be valid.")
     private String email;
+
+    @NotNull(message = "Password is required.")
+    @Size(min = 6, max = 50, message = "Password must be between 6 and 50 characters.")
+    private String password;
 }

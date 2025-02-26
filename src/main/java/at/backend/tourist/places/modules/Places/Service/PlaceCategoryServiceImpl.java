@@ -1,11 +1,11 @@
 package at.backend.tourist.places.modules.Places.Service;
 
+import at.backend.tourist.places.core.Exceptions.ResourceNotFoundException;
 import at.backend.tourist.places.modules.Places.AutoMappers.PlaceCategoryMapper;
 import at.backend.tourist.places.modules.Places.DTOs.PlaceCategoryDTO;
 import at.backend.tourist.places.modules.Places.DTOs.PlaceCategoryInsertDTO;
 import at.backend.tourist.places.modules.Places.Models.PlaceCategory;
 import at.backend.tourist.places.modules.Places.Repository.PlaceCategoryRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -33,8 +33,7 @@ public class PlaceCategoryServiceImpl implements PlaceCategoryService {
         Optional<PlaceCategory> optionalPlaceCategory = placeCategoryRepository.findById(id);
         return optionalPlaceCategory
                 .map(activityMapper::entityToDTO)
-                .orElse(null);
-
+                .orElseThrow(() -> new ResourceNotFoundException("Place Category", "id", id));
     }
 
     @Override
@@ -50,7 +49,7 @@ public class PlaceCategoryServiceImpl implements PlaceCategoryService {
     public void delete(Long id) {
         boolean exists = placeCategoryRepository.existsById(id);
         if (!exists) {
-            throw new EntityNotFoundException("PlaceCategory not found");
+            throw new ResourceNotFoundException("Place Category", "id", id);
         }
 
         placeCategoryRepository.deleteById(id);

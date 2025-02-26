@@ -57,7 +57,7 @@ public class ResponseWrapper<T> {
 
     @Schema(description = "Creates a success response for found entities")
     public static <T> ResponseWrapper<T> found(T data, String entity) {
-        String foundMsg = entity + " data successfully Fetched";
+        String foundMsg = entity + " data successfully fetched";
         return new ResponseWrapper<>(true, data, foundMsg, 200);
     }
 
@@ -86,7 +86,7 @@ public class ResponseWrapper<T> {
 
     @Schema(description = "Creates a not found error response")
     public static <T> ResponseWrapper<T> notFound(String entity) {
-        String notFoundMsg = entity + " not Found";
+        String notFoundMsg = entity + " not found";
         return new ResponseWrapper<>(false, null, notFoundMsg, 404);
     }
 
